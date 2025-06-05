@@ -25,6 +25,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".claude", ".claude", "{1702
 		.claude\settings.local.json = .claude\settings.local.json
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{18977A52-CBB9-4655-8DF3-305D5E09632D}"
+	ProjectSection(SolutionItems) = preProject
+		docs\design.md = docs\design.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

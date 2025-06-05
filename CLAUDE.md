@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a .NET 9.0 MCP (Model Context Protocol) service implementation that provides a JSON-RPC API for tool listing and invocation. The service exposes tools that can be called by AI models through a standardized protocol.
+This is a .NET 9.0 MCP (Model Context Protocol) service implementation using the MCPSharp library. The service provides a standardized way for AI models to discover and invoke tools through JSON-RPC.
 
 ## Development Commands
 
@@ -18,7 +18,7 @@ dotnet build
 dotnet run --project src/MCP.Service/MCP.Service.csproj
 ```
 
-The service will start on `http://0.0.0.0:5050` (hardcoded in Program.cs:7).
+The service will start on port 5050 using MCPSharp's built-in server.
 
 ### Run tests
 ```bash
@@ -34,34 +34,43 @@ dotnet restore
 
 ### Core Components
 
-1. **ToolsController** (`src/MCP.Service/Controllers/ToolsController.cs`)
-   - Single controller handling all JSON-RPC requests at `/rpc` endpoint
-   - Implements two methods:
-     - `tools/list`: Returns available tools with their schemas
-     - `tools/call`: Executes a specific tool with provided arguments
-   - Currently includes a sample `get_weather` tool implementation
+1. **MCPSharp Integration**
+   - Uses MCPSharp library for all MCP protocol handling
+   - Automatic JSON-RPC request/response management
+   - Built-in parameter validation
 
-2. **Models** (`src/MCP.Service/Models/`)
-   - `JsonRpcRequest/Response`: Standard JSON-RPC 2.0 message format
-   - `ToolDefinition`: Tool metadata including name, description, and JSON Schema for parameters
-   - `ToolListResult/ToolCallResult`: Response formats for tool operations
-   - `JsonRpcError`: Error response structure
+2. **Tools** (`src/MCP.Service/Tools/`)
+   - `WeatherTools.cs`: Contains weather-related MCP tools
+   - Tools are defined using attributes:
+     - `[McpTool]`: Marks a method as an MCP tool
+     - `[McpParameter]`: Defines tool parameters
 
 3. **Service Configuration**
-   - Minimal ASP.NET Core setup with controller routing
-   - No authentication/authorization configured
-   - Logging configured via standard appsettings.json
+   - Minimal setup using `MCPServer.StartAsync()`
+   - Server name: "MCP Weather Service"
+   - Version: "1.0.0"
+   - Port: 5050
 
 ## Key Implementation Details
 
-- Tools are statically defined in `_tools` list in ToolsController
-- Tool execution logic is implemented directly in the controller (see `get_weather` example)
-- Response content follows MCP format with `type: "text"` content blocks
-- Error handling returns appropriate JSON-RPC error codes
+- Tools are discovered automatically via reflection
+- MCPSharp handles all JSON-RPC communication
+- Tools must be static methods decorated with `[McpTool]`
+- Parameters use `[McpParameter]` for metadata
 
 ## Adding New Tools
 
 To add a new tool:
-1. Add a `ToolDefinition` to the `_tools` list in ToolsController
-2. Implement the tool's execution logic in `HandleToolsCall` method
-3. Follow the existing pattern for parameter validation and response formatting
+1. Create a new class in the `Tools` folder or add to existing class
+2. Add a static method with `[McpTool]` attribute
+3. Use `[McpParameter]` on parameters to define requirements
+4. Example:
+   ```csharp
+   [McpTool("tool_name", "Tool description")]
+   public static string MyTool(
+       [McpParameter(true, "Parameter description")] string param)
+   {
+       // Tool implementation
+       return result;
+   }
+   ```

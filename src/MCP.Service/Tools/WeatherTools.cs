@@ -1,0 +1,21 @@
+// -----------------------------------------------------------------------
+// <copyright file="WeatherTools.cs" company="Microsoft Corp.">
+//     Copyright (c) Microsoft Corp. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace MCP.Service.Tools
+{
+    using MCPSharp;
+
+    public class WeatherTools
+    {
+        [McpTool("get_weather", "Get current weather for a location")]
+        public static string GetWeather(
+            [McpParameter(true, "City or zip code")] string location)
+        {
+            // TODO: Replace with real API call. Here we return dummy data:
+            return $"Current weather in {location}: Temperature: 72°F, Conditions: Partly cloudy";
+        }
+    }
+}

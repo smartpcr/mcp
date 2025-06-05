@@ -1,6 +1,70 @@
-@MCP.Service_HostAddress = http://localhost:5022
+@MCP.Service_HostAddress = http://localhost:5050
 
-GET {{MCP.Service_HostAddress}}/weatherforecast/
-Accept: application/json
+# MCPSharp handles the JSON-RPC endpoint automatically
+# Test tools/list
+POST {{MCP.Service_HostAddress}}/
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "method": "tools/list",
+  "params": {},
+  "id": 1
+}
+
+###
+
+# Test tools/call for get_weather
+POST {{MCP.Service_HostAddress}}/
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "get_weather",
+    "arguments": {
+      "location": "New York"
+    }
+  },
+  "id": 2
+}
+
+###
+
+# Test calculator add
+POST {{MCP.Service_HostAddress}}/
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "add",
+    "arguments": {
+      "a": 10,
+      "b": 5
+    }
+  },
+  "id": 3
+}
+
+###
+
+# Test string reverse
+POST {{MCP.Service_HostAddress}}/
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "reverse_string",
+    "arguments": {
+      "input": "Hello World"
+    }
+  },
+  "id": 4
+}
 
 ###

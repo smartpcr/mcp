@@ -1,7 +1,18 @@
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllers();
-var app = builder.Build();
+// -----------------------------------------------------------------------
+// <copyright file="Program.cs" company="Microsoft Corp.">
+//     Copyright (c) Microsoft Corp. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
-app.MapControllers(); // This picks up [Route("rpc")] on ToolsController
+using System;
+using MCPSharp;
 
-app.Run("http://0.0.0.0:5050"); // Listen on all interfaces port 5000
+// Configure and start the MCP server
+var serverName = "MCP Weather Service";
+var serverVersion = "1.0.0";
+
+// Set the port via environment variable or use default
+Environment.SetEnvironmentVariable("MCP_PORT", "5050");
+
+// Start the MCP server
+await MCPServer.StartAsync(serverName, serverVersion);
