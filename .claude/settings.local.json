@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(dotnet build)",
+      "Bash(dotnet clean:*)",
+      "Bash(dotnet test)",
+      "Bash(dotnet sln remove:*)",
+      "Bash(grep:*)",
+      "Bash(mkdir:*)",
+      "Bash(docker build:*)",
+      "Bash(dotnet build:*)",
+      "Bash(docker rmi:*)",
+      "Bash(mv:*)",
+      "Bash(rg:*)",
+      "Bash(/home/xd/.nvm/versions/node/v22.16.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n \"namespace\\s+[^{]+\\{\\s*\\{\\s*using\" /mnt/e/work/github/crp/reliablestore/src --type cs)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet restore)",
+      "Bash(rm:*)",
+      "Bash(rm:*)",
+      "Bash(rm:*)",
+      "Bash(dotnet --version)",
+      "Bash(ls:*)",
+      "Bash(export:*)",
+      "Bash(dotnet --info)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(dotnet publish:*)"
+    ],
+    "deny": []
+  }
+}
