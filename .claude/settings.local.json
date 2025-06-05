@@ -29,7 +29,12 @@
       "Bash(dotnet publish:*)",
       "WebFetch(domain:github.com)",
       "Bash(rm:*)",
-      "Bash(dotnet build)"
+      "Bash(dotnet build)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(dotnet new:*)",
+      "Bash(dotnet sln add:*)",
+      "Bash(dotnet sln remove:*)"
     ],
     "deny": []
   }
