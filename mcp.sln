@@ -7,6 +7,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCP.Service", "src\MCP.Service\MCP.Service.csproj", "{49A8DA60-11F2-4AC8-ABE2-6B253D884D11}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{F088C068-CF9C-4D8F-B599-D545013200D0}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		Directory.Packages.props = Directory.Packages.props
+		global.json = global.json
+		stylecop.ruleset = stylecop.ruleset
+		version.json = version.json
+		CLAUDE.md = CLAUDE.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".claude", ".claude", "{1702E74D-D6DE-4BF5-B258-87EE63A70D93}"
+	ProjectSection(SolutionItems) = preProject
+		.claude\settings.local.json = .claude\settings.local.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,5 +53,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{49A8DA60-11F2-4AC8-ABE2-6B253D884D11} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{1702E74D-D6DE-4BF5-B258-87EE63A70D93} = {F088C068-CF9C-4D8F-B599-D545013200D0}
 	EndGlobalSection
 EndGlobal
