@@ -1,0 +1,181 @@
+name: 3-Node Akka Cluster Integration
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    env:
+      # Define the seed-nodes CLI value as a JSON array for HOCON
+      SEED_NODES: >
+        ["akka.tcp://MyCluster@127.0.0.1:2551",
+         "akka.tcp://MyCluster@127.0.0.1:2552",
+         "akka.tcp://MyCluster@127.0.0.1:2553"]
+      # We will spin up node1 on 2551, node2 on 2552, node3 on 2553
+      # Each service container will read NODE_ID and choose its port accordingly.
+      SERVICE_COUNT: 10    # number of service types (A..J)
+      REPLICAS: 3          # number of replicas per service
+      NETWORK_NAME: cluster-net
+      IMAGE_TAG: latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+
+      - name: Build Cluster Node Image
+        run: |
+          cd src/ClusterNode
+          dotnet publish -c Release -o ./publish
+          docker build -t ghcr.io/${{ github.repository }}/cluster-node:${{ env.IMAGE_TAG }} ./publish
+
+      - name: Build Service Images
+        run: |
+          # Assume each service has its own folder: ServiceA, ServiceB, … ServiceJ under src/Services
+          for svc in ServiceA ServiceB ServiceC ServiceD ServiceE ServiceF ServiceG ServiceH ServiceI ServiceJ; do
+            cd src/Services/$svc
+            dotnet publish -c Release -o ./publish
+            docker build -t ghcr.io/${{ github.repository }}/$svc:${{ env.IMAGE_TAG }} ./publish
+            cd ../../../..
+          done
+
+      - name: Create Docker network
+        run: |
+          docker network create $NETWORK_NAME || true
+
+      # 3 Akka “node” containers, each one hosts the Akka.Cluster seed endpoint
+      - name: Start Node 1 (port 2551)
+        run: |
+          docker run -d --name node1 \
+            --network $NETWORK_NAME \
+            -e HOSTNAME="127.0.0.1" \
+            -e PORT=2551 \
+            -e SEED_NODES="$SEED_NODES" \
+            ghcr.io/${{ github.repository }}/cluster-node:${{ env.IMAGE_TAG }}
+
+      - name: Start Node 2 (port 2552)
+        run: |
+          docker run -d --name node2 \
+            --network $NETWORK_NAME \
+            -e HOSTNAME="127.0.0.1" \
+            -e PORT=2552 \
+            -e SEED_NODES="$SEED_NODES" \
+            ghcr.io/${{ github.repository }}/cluster-node:${{ env.IMAGE_TAG }}
+
+      - name: Start Node 3 (port 2553)
+        run: |
+          docker run -d --name node3 \
+            --network $NETWORK_NAME \
+            -e HOSTNAME="127.0.0.1" \
+            -e PORT=2553 \
+            -e SEED_NODES="$SEED_NODES" \
+            ghcr.io/${{ github.repository }}/cluster-node:${{ env.IMAGE_TAG }}
+
+      - name: Wait for cluster‐nodes to join (15s)
+        run: |
+          for i in {1..15}; do
+            # Look for “Members.Count = 3” in node1 logs
+            if docker logs node1 2>&1 | grep -q "Members.Count.*3.*Up"; then
+              echo "Cluster formed (3 nodes)."
+              exit 0
+            fi
+            echo "Waiting for Akka cluster (node1)… ($i/15)"
+            sleep 2
+          done
+          echo "ERROR: Cluster did not form in time."
+          docker logs node1
+          exit 1
+
+      # Now that the 3 “node” containers are up, we launch 10 services × 3 replicas = 30 containers.
+      # Each service container will receive NODE_ID=1,2,3 to decide which port to bind to (2551,2552,2553).
+      - name: Start 30 service containers
+        run: |
+          # service types are A..J
+          types=(A B C D E F G H I J)
+          for type in "${types[@]}"; do
+            for replica in 1 2 3; do
+              svc_name="Service${type}_r${replica}"
+              # NODE_ID determines which “node container” it belongs to: 1→2551, 2→2552, 3→2553
+              # We also pass SERVICE_TYPE so container can know which actor to start (e.g. ServiceAActor, ServiceBActor, etc.)
+              docker run -d --name $svc_name \
+                --network $NETWORK_NAME \
+                -e NODE_ID="$replica" \
+                -e SERVICE_TYPE="Service${type}" \
+                -e SEED_NODES="$SEED_NODES" \
+                ghcr.io/${{ github.repository }}/Service${type}:${{ env.IMAGE_TAG }}
+            done
+          done
+
+      - name: Wait for all service replicas to join cluster (20s)
+        run: |
+          for i in {1..20}; do
+            # We expect total Members.Count = 3 (only the 3 seed-node processes, not the 30 service processes),
+            # but each service container will register its own ActorSystem in the cluster under the node it belongs to.
+            # We can check in node1 logs that it sees _all_ services from replica 1 (NODE_ID=1).
+            count=$(docker logs node1 2>&1 | grep -c "ServiceA\\|ServiceB\\|ServiceC\\|ServiceD\\|ServiceE\\|ServiceF\\|ServiceG\\|ServiceH\\|ServiceI\\|ServiceJ")
+            if [ "$count" -ge 10 ]; then
+              echo "All service replicas under NODE_ID=1 have joined."
+              exit 0
+            fi
+            echo "Waiting for service replicas on node1… ($i/20)"
+            sleep 1
+          done
+          echo "ERROR: Some services did not report in time."
+          docker logs node1
+          exit 1
+
+      # --------------- Integration Test Section ---------------
+      # Now run a small test that checks:
+      #   - Each of the 10 service types has exactly one replica under each of the three nodes.
+      - name: Run integration tests (PowerShell)
+        shell: bash
+        run: |
+          # We will query each “node” (node1, node2, node3) for which services have joined.
+          # Our service containers log: “[ServiceX on akka.tcp://MyCluster@127.0.0.1:255Y] received: HELLO”
+          # We only need to see in logs that a service actor has started.
+          declare -A seenCount
+          for type in A B C D E F G H I J; do
+            seenCount["$type"]=0
+          done
+
+          for node in 1 2 3; do
+            logs=$(docker logs "node${node}")
+            for type in A B C D E F G H I J; do
+              if echo "$logs" | grep -q "Service${type}\\[akka.tcp://MyCluster@127.0.0.1:255${node}\\]"; then
+                seenCount["$type"]=$(( seenCount["$type"] + 1 ))
+              fi
+            done
+          done
+
+          # Verify each type was “seen” exactly 3 times (once per node)
+          all_ok=true
+          for type in "${!seenCount[@]}"; do
+            if [ "${seenCount[$type]}" -ne 3 ]; then
+              echo "ERROR: Service${type} replicas not found on all 3 nodes. Count=${seenCount[$type]}"
+              all_ok=false
+            else
+              echo "OK: Service${type} found on all 3 nodes."
+            fi
+          done
+          if [ "$all_ok" = false ]; then
+            exit 1
+          fi
+
+      # --------------- Teardown Section ---------------
+      - name: Tear down all containers
+        if: always()
+        run: |
+          docker rm -f node1 node2 node3 || true
+          types=(A B C D E F G H I J)
+          for type in "${types[@]}"; do
+            for replica in 1 2 3; do
+              docker rm -f "Service${type}_r${replica}" || true
+            done
+          done
+          docker network rm $NETWORK_NAME || true
