@@ -34,7 +34,14 @@
       "Bash(mv:*)",
       "Bash(dotnet new:*)",
       "Bash(dotnet sln add:*)",
-      "Bash(dotnet sln remove:*)"
+      "Bash(dotnet sln remove:*)",
+      "Bash(cp:*)",
+      "Bash(dotnet build:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(dotnet sln:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(dotnet new:*)"
     ],
     "deny": []
   }
