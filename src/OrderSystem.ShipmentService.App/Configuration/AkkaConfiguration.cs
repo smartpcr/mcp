@@ -2,21 +2,22 @@
 using Akka.Actor;
 using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
-using Akka.Configuration;
 using Akka.Discovery.Azure;
 using Akka.Discovery.Config.Hosting;
 using Akka.Hosting;
 using Akka.Management;
 using Akka.Management.Cluster.Bootstrap;
-using Akka.Persistence.Azure;
 using Akka.Persistence.Azure.Hosting;
 using Akka.Persistence.Hosting;
 using Akka.Remote.Hosting;
-using Akka.Util;
 using OrderSystem.ShipmentService.App.Actors;
-using OrderSystem.ShipmentService.Domain;
 
 namespace OrderSystem.ShipmentService.App.Configuration;
+
+using System;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using OrderSystem.CatalogService.Domain;
 
 public static class AkkaConfiguration
 {

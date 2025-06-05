@@ -1,4 +1,7 @@
-﻿namespace OrderSystem.CustomerService.Domain;
+﻿namespace OrderSystem.Contracts.Messages;
+
+using Akka.Actor;
+using OrderSystem.CatalogService.Domain;
 
 /// <summary>
 /// Defines a command that is related to a counter.
@@ -13,7 +16,7 @@ public sealed record SetCounterCommand(string CounterId, int Value) : ICounterCo
 
 public sealed record CounterCommandResponse
     (string CounterId, bool IsSuccess, ICounterEvent? Event = null, string? ErrorMessage = null) : ICounterCommand;
-    
+
 public sealed record SubscribeToCounter(string CounterId, IActorRef Subscriber) : ICounterCommand;
 
 public sealed record UnsubscribeToCounter(string CounterId, IActorRef Subscriber) : ICounterCommand;

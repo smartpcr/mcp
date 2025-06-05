@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Shared.Contracts.Models
+namespace OrderSystem.Contracts.Models
 {
     public enum PaymentStatus
     {
@@ -12,6 +12,7 @@ namespace Shared.Contracts.Models
         Processing,
         Succeeded,
         Failed,
-        Refunded
+        Refunded,
+        Cancelled
     }
 }

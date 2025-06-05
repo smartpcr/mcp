@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Shared.Contracts.Models
+namespace OrderSystem.Contracts.Models
 {
     public record OrderItem(
         string ProductId,

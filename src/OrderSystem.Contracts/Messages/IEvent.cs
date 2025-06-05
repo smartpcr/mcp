@@ -1,5 +1,12 @@
-namespace Shared.Contracts.Messages;
+// -----------------------------------------------------------------------
+// <copyright file="IEvent.cs" company="Microsoft Corp.">
+//     Copyright (c) Microsoft Corp. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
-public interface IEvent
+namespace OrderSystem.Contracts.Messages
 {
+    public interface IEvent
+    {
+    }
 }

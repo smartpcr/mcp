@@ -6,7 +6,10 @@
 
 namespace Shared.Contracts.Messages
 {
-    using Shared.Contracts.Models;
+    using System;
+    using System.Collections.Generic;
+    using OrderSystem.Contracts.Messages;
+    using OrderSystem.Contracts.Models;
 
     // Commands
     public record CreateOrder(

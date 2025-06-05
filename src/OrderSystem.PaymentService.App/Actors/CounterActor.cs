@@ -1,9 +1,13 @@
 ﻿using Akka.Actor;
 using Akka.Event;
 using Akka.Persistence;
-using OrderSystem.PaymentService.Domain;
 
 namespace OrderSystem.PaymentService.App.Actors;
+
+using System;
+using System.Collections.Generic;
+using OrderSystem.CatalogService.Domain;
+using OrderSystem.Contracts.Messages;
 
 public record Counter(string CounterId, int CurrentValue)
 {
@@ -23,7 +27,7 @@ public static class CounterExtensions
             _ => throw new InvalidOperationException($"Unknown command type: {command.GetType().Name}")
         };
     }
-    
+
     public static Counter ApplyEvent(this Counter counter, ICounterEvent @event)
     {
         return @event switch
@@ -95,7 +99,7 @@ public sealed class CounterActor : ReceivePersistentActor
                     _counter = _counter.ApplyEvent(@event);
                     _log.Info("Updated counter via {0} - new value is {1}", @event, _counter.CurrentValue);
                     Sender.Tell(response);
-                    
+
                     // push events to all subscribers
                     foreach (var s in _subscribers)
                     {

@@ -3,6 +3,8 @@ using Akka.Cluster.Sharding;
 
 namespace OrderSystem.PaymentService.App.Actors;
 
+using System;
+
 /// <summary>
 /// A generic "child per entity" parent actor.
 /// </summary>
@@ -15,7 +17,7 @@ public sealed class GenericChildPerEntityParent : ReceiveActor
     {
         return Akka.Actor.Props.Create(() => new GenericChildPerEntityParent(extractor, propsFactory));
     }
-    
+
     /*
      * Re-use Akka.Cluster.Sharding's infrastructure here to keep things simple.
      */
@@ -26,11 +28,11 @@ public sealed class GenericChildPerEntityParent : ReceiveActor
     {
         _extractor = extractor;
         _propsFactory = propsFactory;
-        
+
         ReceiveAny(o =>
         {
             var entityId = _extractor.EntityId(o);
-            if (string.IsNullOrEmpty(entityId)) 
+            if (string.IsNullOrEmpty(entityId))
                 return;
             Context.Child(entityId).GetOrElse(() => Context.ActorOf(propsFactory(entityId), entityId))
                 .Forward(_extractor.EntityMessage(o));

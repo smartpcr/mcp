@@ -18,6 +18,10 @@ using OrderSystem.CatalogService.Domain;
 
 namespace OrderSystem.CatalogService.App.Configuration;
 
+using System;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
 public static class AkkaConfiguration
 {
     public static IServiceCollection ConfigureWebApiAkka(this IServiceCollection services, IConfiguration configuration,

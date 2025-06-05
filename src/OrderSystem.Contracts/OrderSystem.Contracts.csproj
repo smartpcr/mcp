@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Akka" />
-    <PackageReference Include="Akka.Persistence.EventStore" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,8 @@
-using Shared.Contracts.Models;
 
 namespace Shared.Contracts.Messages;
+
+using System;
+using OrderSystem.Contracts.Messages;
 
 // Product/Catalog Commands
 public record CreateProduct(string ProductId, string Name, decimal Price, int InitialStock, string? CorrelationId = null) : ICommand
@@ -23,10 +25,6 @@ public record ReplenishStock(string ProductId, int Quantity, string? Correlation
     public string CorrelationId { get; init; } = CorrelationId ?? Guid.NewGuid().ToString();
 }
 
-public record CheckAvailability(string ProductId, int RequiredQuantity, string? CorrelationId = null) : ICommand
-{
-    public string CorrelationId { get; init; } = CorrelationId ?? Guid.NewGuid().ToString();
-}
 
 // Product Events
 public interface IProductEvent : IEvent { string ProductId { get; } }

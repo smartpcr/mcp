@@ -6,6 +6,11 @@ using OrderSystem.CatalogService.Domain;
 
 namespace OrderSystem.CatalogService.App.Controllers;
 
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using OrderSystem.Contracts.Messages;
+
 [ApiController]
 [Route("[controller]")]
 public class CounterController : ControllerBase
@@ -25,7 +30,7 @@ public class CounterController : ControllerBase
         var counter = await _counterActor.Ask<Counter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5));
         return counter;
     }
-    
+
     [HttpPost("{counterId}")]
     public async Task<IActionResult> Post(string counterId, [FromBody] int increment)
     {
@@ -37,7 +42,7 @@ public class CounterController : ControllerBase
 
         return Ok(result.Event);
     }
-    
+
     [HttpPut("{counterId}")]
     public async Task<IActionResult> Put(string counterId, [FromBody] int counterValue)
     {
@@ -46,7 +51,7 @@ public class CounterController : ControllerBase
         {
             return BadRequest();
         }
-        
+
         return Ok(result.Event);
     }
 }

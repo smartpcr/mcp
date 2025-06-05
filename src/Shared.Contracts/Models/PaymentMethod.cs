@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace OrderSystem.Contracts.Models
+namespace Shared.Contracts.Models
 {
     using System;
 
@@ -13,8 +13,19 @@ namespace OrderSystem.Contracts.Models
         string? CardNumber = null,
         string? ExpiryDate = null,
         string? CardHolderName = null,
-        string? BankAccountNumber = null
-    );
+        string? BankAccountNumber = null);
+
+    public enum PaymentStatus
+    {
+        Pending,
+        Processing,
+        Succeeded,
+        Failed,
+        Refunded,
+        Cancelled
+    }
+
+    public record PaymentAttempt(DateTime AttemptedAt, bool Success, string? Response = null);
 
     public record StockReservation(string OrderId, int Quantity, DateTime ReservedAt);
 

@@ -2,9 +2,14 @@ using Akka.Actor;
 using Akka.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using OrderSystem.PaymentService.App.Actors;
-using OrderSystem.PaymentService.Domain;
 
 namespace OrderSystem.PaymentService.App.Controllers;
+
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using OrderSystem.CatalogService.Domain;
+using OrderSystem.Contracts.Messages;
 
 [ApiController]
 [Route("[controller]")]
@@ -25,7 +30,7 @@ public class CounterController : ControllerBase
         var counter = await _counterActor.Ask<Counter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5));
         return counter;
     }
-    
+
     [HttpPost("{counterId}")]
     public async Task<IActionResult> Post(string counterId, [FromBody] int increment)
     {
@@ -37,7 +42,7 @@ public class CounterController : ControllerBase
 
         return Ok(result.Event);
     }
-    
+
     [HttpPut("{counterId}")]
     public async Task<IActionResult> Put(string counterId, [FromBody] int counterValue)
     {
@@ -46,7 +51,7 @@ public class CounterController : ControllerBase
         {
             return BadRequest();
         }
-        
+
         return Ok(result.Event);
     }
 }

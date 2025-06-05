@@ -7,6 +7,7 @@ namespace OrderSystem.CatalogService.App.Actors;
 
 using System;
 using System.Collections.Generic;
+using OrderSystem.Contracts.Messages;
 
 public record Counter(string CounterId, int CurrentValue)
 {

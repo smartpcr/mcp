@@ -28,7 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\OrderSystem.PaymentService.Domain\OrderSystem.PaymentService.Domain.csproj" />
+      <ProjectReference Include="..\OrderSystem.Contracts\OrderSystem.Contracts.csproj" />
     </ItemGroup>
 
 </Project>

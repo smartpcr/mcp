@@ -1,6 +1,10 @@
-using Shared.Contracts.Models;
-
 namespace Shared.Contracts.Messages;
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using OrderSystem.Contracts.Messages;
+using OrderSystem.Contracts.Models;
 
 // Shipment Commands
 public record CreateShipment(string ShipmentId, string OrderId, List<OrderItem> Items, Address Address, string? CorrelationId = null) : ICommand

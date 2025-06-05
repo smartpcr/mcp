@@ -14,9 +14,13 @@ using Akka.Persistence.Hosting;
 using Akka.Remote.Hosting;
 using Akka.Util;
 using OrderSystem.PaymentService.App.Actors;
-using OrderSystem.PaymentService.Domain;
 
 namespace OrderSystem.PaymentService.App.Configuration;
+
+using System;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using OrderSystem.CatalogService.Domain;
 
 public static class AkkaConfiguration
 {

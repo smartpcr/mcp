@@ -1,5 +1,10 @@
+using System;
 using Akka.HealthCheck.Hosting;
 using Akka.HealthCheck.Hosting.Web;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using OrderSystem.CatalogService.App.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
