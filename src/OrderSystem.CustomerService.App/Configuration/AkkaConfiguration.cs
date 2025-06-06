@@ -21,7 +21,7 @@ namespace OrderSystem.CustomerService.App.Configuration
     using Akka.Remote.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using OrderSystem.CatalogService.Domain;
+    using OrderSystem.Contracts.Messages;
     using OrderSystem.CustomerService.App.Actors;
 
     public static class AkkaConfiguration

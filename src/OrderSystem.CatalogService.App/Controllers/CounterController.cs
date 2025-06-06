@@ -13,7 +13,6 @@ namespace OrderSystem.CatalogService.App.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using OrderSystem.CatalogService.App.Actors;
-    using OrderSystem.CatalogService.Domain;
     using OrderSystem.Contracts.Messages;
 
     [ApiController]
@@ -30,9 +29,9 @@ namespace OrderSystem.CatalogService.App.Controllers
         }
 
         [HttpGet("{counterId}")]
-        public async Task<Counter> Get(string counterId)
+        public async Task<OrderSystem.CatalogService.App.Actors.Counter> Get(string counterId)
         {
-            var counter = await this.counterActor.Ask<Counter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5));
+            var counter = await this.counterActor.Ask<OrderSystem.CatalogService.App.Actors.Counter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5));
             return counter;
         }
 

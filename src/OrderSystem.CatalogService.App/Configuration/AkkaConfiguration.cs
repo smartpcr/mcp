@@ -25,7 +25,7 @@ namespace OrderSystem.CatalogService.App.Configuration
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using OrderSystem.CatalogService.App.Actors;
-    using OrderSystem.CatalogService.Domain;
+    using OrderSystem.Contracts.Messages;
 
     public static class AkkaConfiguration
     {

@@ -12,7 +12,6 @@ namespace OrderSystem.CustomerService.App.Controllers
     using Akka.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
-    using OrderSystem.CatalogService.Domain;
     using OrderSystem.Contracts.Messages;
     using OrderSystem.CustomerService.App.Actors;
 
@@ -30,9 +29,9 @@ namespace OrderSystem.CustomerService.App.Controllers
         }
 
         [HttpGet("{counterId}")]
-        public async Task<Counter> Get(string counterId)
+        public async Task<OrderSystem.CustomerService.App.Actors.Counter> Get(string counterId)
         {
-            var counter = await this.counterActor.Ask<Counter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5));
+            var counter = await this.counterActor.Ask<OrderSystem.CustomerService.App.Actors.Counter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5));
             return counter;
         }
 

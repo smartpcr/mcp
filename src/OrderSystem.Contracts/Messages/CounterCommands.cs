@@ -7,7 +7,6 @@
 namespace OrderSystem.Contracts.Messages
 {
     using Akka.Actor;
-    using OrderSystem.CatalogService.Domain;
 
     /// <summary>
     /// Defines a command that is related to a counter.
@@ -17,6 +16,8 @@ namespace OrderSystem.Contracts.Messages
     }
 
     public sealed record IncrementCounterCommand(string CounterId, int Amount) : ICounterCommand;
+
+    public sealed record DecrementCounterCommand(string CounterId) : ICounterCommand;
 
     public sealed record SetCounterCommand(string CounterId, int Value) : ICounterCommand;
 

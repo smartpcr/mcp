@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace OrderSystem.CatalogService.Domain
+namespace OrderSystem.Contracts.Messages
 {
     /// <summary>
     /// Queries are similar to commands, but they have no side effects.
@@ -16,4 +16,9 @@ namespace OrderSystem.CatalogService.Domain
     }
 
     public sealed record FetchCounter(string CounterId) : ICounterQuery;
+
+    /// <summary>
+    /// Represents the current state of a counter.
+    /// </summary>
+    public sealed record Counter(string CounterId, int CurrentValue);
 }

@@ -7,38 +7,32 @@
 namespace MCP.Service.Tools
 {
     using System;
-    using MCPSharp;
+    using System.ComponentModel;
+    using ModelContextProtocol.Server;
 
+    [McpServerToolType]
     public class CalculatorTools
     {
-        [McpTool("add", "Adds two numbers")]
-        public static double Add(
-            [McpParameter(true, "First number")] double a,
-            [McpParameter(true, "Second number")] double b)
+        [McpServerTool, Description("Adds two numbers")]
+        public static double Add(double a, double b)
         {
             return a + b;
         }
 
-        [McpTool("subtract", "Subtracts two numbers")]
-        public static double Subtract(
-            [McpParameter(true, "First number")] double a,
-            [McpParameter(true, "Second number")] double b)
+        [McpServerTool, Description("Subtracts two numbers")]
+        public static double Subtract(double a, double b)
         {
             return a - b;
         }
 
-        [McpTool("multiply", "Multiplies two numbers")]
-        public static double Multiply(
-            [McpParameter(true, "First number")] double a,
-            [McpParameter(true, "Second number")] double b)
+        [McpServerTool, Description("Multiplies two numbers")]
+        public static double Multiply(double a, double b)
         {
             return a * b;
         }
 
-        [McpTool("divide", "Divides two numbers")]
-        public static double Divide(
-            [McpParameter(true, "Dividend")] double a,
-            [McpParameter(true, "Divisor")] double b)
+        [McpServerTool, Description("Divides two numbers")]
+        public static double Divide(double a, double b)
         {
             if (b == 0)
             {

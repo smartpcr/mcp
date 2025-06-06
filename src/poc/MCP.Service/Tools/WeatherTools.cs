@@ -6,13 +6,14 @@
 
 namespace MCP.Service.Tools
 {
-    using MCPSharp;
+    using System.ComponentModel;
+    using ModelContextProtocol.Server;
 
+    [McpServerToolType]
     public class WeatherTools
     {
-        [McpTool("get_weather", "Get current weather for a location")]
-        public static string GetWeather(
-            [McpParameter(true, "City or zip code")] string location)
+        [McpServerTool, Description("Get current weather for a location")]
+        public static string GetWeather(string location)
         {
             // TODO: Replace with real API call. Here we return dummy data:
             return $"Current weather in {location}: Temperature: 72°F, Conditions: Partly cloudy";

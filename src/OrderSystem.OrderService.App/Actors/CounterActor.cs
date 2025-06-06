@@ -11,7 +11,6 @@ namespace OrderSystem.OrderService.App.Actors
     using Akka.Actor;
     using Akka.Event;
     using Akka.Persistence;
-    using OrderSystem.CatalogService.Domain;
     using OrderSystem.Contracts.Messages;
 
     public record Counter(string CounterId, int CurrentValue)
@@ -25,10 +24,10 @@ namespace OrderSystem.OrderService.App.Actors
             return command switch
             {
                 IncrementCounterCommand increment => new CounterCommandResponse(counter.CounterId, true,
-                    new CounterValueIncremented(counter.CounterId, increment.Amount,
+                    new CounterIncrementedEvent(counter.CounterId,
                         increment.Amount + counter.CurrentValue)),
                 SetCounterCommand set => new CounterCommandResponse(counter.CounterId, true,
-                    new CounterValueSet(counter.CounterId, set.Value)),
+                    new CounterSetEvent(counter.CounterId, set.Value)),
                 _ => throw new InvalidOperationException($"Unknown command type: {command.GetType().Name}")
             };
         }
@@ -37,8 +36,8 @@ namespace OrderSystem.OrderService.App.Actors
         {
             return @event switch
             {
-                CounterValueIncremented increment => counter with { CurrentValue = increment.NewValue },
-                CounterValueSet set => counter with { CurrentValue = set.NewValue },
+                CounterIncrementedEvent increment => counter with { CurrentValue = increment.NewValue },
+                CounterSetEvent set => counter with { CurrentValue = set.NewValue },
                 _ => throw new InvalidOperationException($"Unknown event type: {@event.GetType().Name}")
             };
         }

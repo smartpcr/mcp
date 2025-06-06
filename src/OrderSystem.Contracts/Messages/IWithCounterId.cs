@@ -4,9 +4,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace OrderSystem.CatalogService.Domain
+namespace OrderSystem.Contracts.Messages
 {
-
     /// <summary>
     /// Counters are the only entities that have a counter id.
     ///

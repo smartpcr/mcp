@@ -7,36 +7,34 @@
 namespace MCP.Service.Tools
 {
     using System;
-    using MCPSharp;
+    using System.ComponentModel;
+    using ModelContextProtocol.Server;
 
+    [McpServerToolType]
     public class StringTools
     {
-        [McpTool("reverse_string", "Reverses a string")]
-        public static string ReverseString(
-            [McpParameter(true, "String to reverse")] string input)
+        [McpServerTool, Description("Reverses a string")]
+        public static string ReverseString(string input)
         {
             var charArray = input.ToCharArray();
             Array.Reverse(charArray);
             return new string(charArray);
         }
 
-        [McpTool("to_uppercase", "Converts a string to uppercase")]
-        public static string ToUpperCase(
-            [McpParameter(true, "String to convert")] string input)
+        [McpServerTool, Description("Converts a string to uppercase")]
+        public static string ToUpperCase(string input)
         {
             return input.ToUpper();
         }
 
-        [McpTool("to_lowercase", "Converts a string to lowercase")]
-        public static string ToLowerCase(
-            [McpParameter(true, "String to convert")] string input)
+        [McpServerTool, Description("Converts a string to lowercase")]
+        public static string ToLowerCase(string input)
         {
             return input.ToLower();
         }
 
-        [McpTool("count_words", "Counts the number of words in a string")]
-        public static int CountWords(
-            [McpParameter(true, "String to analyze")] string input)
+        [McpServerTool, Description("Counts the number of words in a string")]
+        public static int CountWords(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
             {

@@ -20,7 +20,7 @@ namespace OrderSystem.PaymentService.App.Configuration;
 using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OrderSystem.CatalogService.Domain;
+using OrderSystem.Contracts.Messages;
 
 public static class AkkaConfiguration
 {

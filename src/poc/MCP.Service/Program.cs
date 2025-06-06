@@ -6,22 +6,18 @@
 
 namespace MCP.Service
 {
-    using System;
-    using MCPSharp;
-
     internal class Program
     {
         public static async Task Main(string[] args)
         {
-            // Configure and start the MCP server
-            var serverName = "MCP Weather Service";
-            var serverVersion = "1.0.0";
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddMcpServer()
+                .WithStdioServerTransport()
+                .WithToolsFromAssembly();
 
-            // Set the port via environment variable or use default
-            Environment.SetEnvironmentVariable("MCP_PORT", "5050");
+            var app = builder.Build();
 
-            // Start the MCP server
-            await MCPServer.StartAsync(serverName, serverVersion);
+            await app.RunAsync();
         }
     }
 }

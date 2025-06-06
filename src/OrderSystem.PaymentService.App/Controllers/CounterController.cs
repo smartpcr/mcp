@@ -8,7 +8,6 @@ namespace OrderSystem.PaymentService.App.Controllers;
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using OrderSystem.CatalogService.Domain;
 using OrderSystem.Contracts.Messages;
 
 [ApiController]
@@ -25,9 +24,9 @@ public class CounterController : ControllerBase
     }
 
     [HttpGet("{counterId}")]
-    public async Task<Counter> Get(string counterId)
+    public async Task<OrderSystem.PaymentService.App.Actors.Counter> Get(string counterId)
     {
-        var counter = await _counterActor.Ask<Counter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5));
+        var counter = await _counterActor.Ask<OrderSystem.PaymentService.App.Actors.Counter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5));
         return counter;
     }
 

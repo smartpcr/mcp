@@ -4,9 +4,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace OrderSystem.CatalogService.Domain
+namespace OrderSystem.Contracts.Messages
 {
-
     /// <summary>
     /// Events are facts of the system. Counter events deal in definitive state changes with the counter.
     /// </summary>
@@ -14,7 +13,9 @@ namespace OrderSystem.CatalogService.Domain
     {
     }
 
-    public sealed record CounterValueIncremented(string CounterId, int Amount, int NewValue) : ICounterEvent;
+    public sealed record CounterIncrementedEvent(string CounterId, int NewValue) : ICounterEvent;
 
-    public sealed record CounterValueSet(string CounterId, int NewValue) : ICounterEvent;
+    public sealed record CounterDecrementedEvent(string CounterId, int NewValue) : ICounterEvent;
+
+    public sealed record CounterSetEvent(string CounterId, int NewValue) : ICounterEvent;
 }
