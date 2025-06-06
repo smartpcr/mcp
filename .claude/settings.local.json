@@ -41,7 +41,9 @@
       "Bash(find:*)",
       "Bash(dotnet sln:*)",
       "WebFetch(domain:github.com)",
-      "Bash(dotnet new:*)"
+      "Bash(dotnet new:*)",
+      "Bash(dotnet add:*)",
+      "Bash(dotnet remove src/OrderSystem.OrderService.App/OrderSystem.OrderService.App.csproj package Stateless)"
     ],
     "deny": []
   }

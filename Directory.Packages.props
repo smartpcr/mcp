@@ -3,7 +3,6 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-
   <PropertyGroup>
     <ExtensionVersion>9.0.3</ExtensionVersion>
     <ExtensionNextVersion>9.3.0</ExtensionNextVersion>
@@ -18,14 +17,13 @@
     <AkkaManagementVersion>1.5.37</AkkaManagementVersion>
     <PbmVersion>1.4.4</PbmVersion>
   </PropertyGroup>
-
   <ItemGroup>
+    <PackageVersion Include="Automatonymous" Version="5.1.3" />
     <PackageVersion Include="MCPSharp" Version="1.0.10" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     <PackageVersion Include="System.Collections.Immutable" Version="9.0.0" />
   </ItemGroup>
-
   <!-- Akka.NET Package Versions -->
   <ItemGroup>
     <PackageVersion Include="Akka" Version="$(AkkaVersion)" />
@@ -39,7 +37,6 @@
     <PackageVersion Include="Petabridge.Cmd.Cluster" Version="$(PbmVersion)" />
     <PackageVersion Include="Petabridge.Cmd.Remote" Version="$(PbmVersion)" />
   </ItemGroup>
-
   <!-- extension -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="$(ExtensionVersion)" />
@@ -51,14 +48,12 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(ExtensionVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="$(ExtensionVersion)" />
   </ItemGroup>
-
   <!-- third party -->
   <ItemGroup>
     <PackageVersion Include="Nerdbank.GitVersioning" Version="3.7.115" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Unity" Version="5.11.7" />
   </ItemGroup>
-
   <!-- test -->
   <ItemGroup Label="UnitTests">
     <PackageVersion Include="coverlet.collector" Version="6.0.4">
@@ -66,10 +61,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
     <PackageVersion Include="FluentAssertions" Version="8.2.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0"/>
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageVersion Include="Moq" Version="4.20.72" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="$(MSTestVersion)"/>
-    <PackageVersion Include="MSTest.TestFramework" Version="$(MSTestVersion)"/>
+    <PackageVersion Include="MSTest.TestAdapter" Version="$(MSTestVersion)" />
+    <PackageVersion Include="MSTest.TestFramework" Version="$(MSTestVersion)" />
     <PackageVersion Include="Reqnroll" Version="$(ReqnrollVersion)" />
     <PackageVersion Include="Reqnroll.CustomPlugin" Version="$(ReqnrollVersion)" />
     <PackageVersion Include="Reqnroll.ExternalData" Version="$(ReqnrollVersion)" />

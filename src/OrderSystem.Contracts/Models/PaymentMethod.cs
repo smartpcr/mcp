@@ -6,8 +6,6 @@
 
 namespace OrderSystem.Contracts.Models
 {
-    using System;
-
     public record PaymentMethod(
         string Type,
         string? CardNumber = null,
@@ -15,32 +13,4 @@ namespace OrderSystem.Contracts.Models
         string? CardHolderName = null,
         string? BankAccountNumber = null
     );
-
-    public record StockReservation(string OrderId, int Quantity, DateTime ReservedAt);
-
-    public enum ProductStatus
-    {
-        Active,
-        Inactive,
-        OutOfStock
-    }
-
-    public enum CustomerStatus
-    {
-        Active,
-        Inactive,
-        Suspended
-    }
-
-    public enum ShipmentStatus
-    {
-        Pending,
-        Created,
-        Scheduled,
-        InTransit,
-        Delivered,
-        Failed
-    }
-
-    public record ShipmentUpdate(DateTime UpdatedAt, string Status, string? Location = null);
 }

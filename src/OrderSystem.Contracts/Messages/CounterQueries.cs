@@ -1,10 +1,19 @@
-﻿namespace OrderSystem.CatalogService.Domain;
+// -----------------------------------------------------------------------
+// <copyright file="CounterQueries.cs" company="Microsoft Corp.">
+//     Copyright (c) Microsoft Corp. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
-/// <summary>
-/// Queries are similar to commands, but they have no side effects.
-///
-/// They are used to retrieve information from the actors.
-/// </summary>
-public interface ICounterQuery : IWithCounterId{ }
+namespace OrderSystem.CatalogService.Domain
+{
+    /// <summary>
+    /// Queries are similar to commands, but they have no side effects.
+    ///
+    /// They are used to retrieve information from the actors.
+    /// </summary>
+    public interface ICounterQuery : IWithCounterId
+    {
+    }
 
-public sealed record FetchCounter(string CounterId) : ICounterQuery;
+    public sealed record FetchCounter(string CounterId) : ICounterQuery;
+}

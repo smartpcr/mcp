@@ -87,9 +87,11 @@ Each actor system is a lightweight, in-memory runtime (e.g. Akka.NET, Orleans, S
 
 Actors never share state or locks. All operations on an aggregate are handled by its dedicated actor, which processes commands one at a time.
 
-## Cross-Context Coordination via Sagas
+## Cross-Context Coordination via Choreography
 
-### Saga Pattern (Choreography)
+### Saga Pattern (Choreography with Automatonymous State Machines)
+
+The system uses **choreography pattern** where each service subscribes to relevant domain events and manages its own state transitions using **Automatonymous** state machines. This eliminates the need for a central orchestrator.
 
 1. OrderActor persists OrderCreated(orderId, customerId, items…) → publishes OrderCreated event onto a message bus (Kafka, RabbitMQ, or Akka event stream).
 2. CatalogActor (in CatalogService) subscribes to OrderCreated; upon receipt, issues ReserveStock(orderId, items…) to its own StockActor (or directly ProductActors).
@@ -109,6 +111,45 @@ Actors never share state or locks. All operations on an aggregate are handled by
 - No distributed transaction or two-phase commit.
 - Each context only does local commits; subsequent steps are triggered by events.
 - Each actor is responsible for idempotency (e.g. if ReserveStock(orderId) is received twice, it only reserves once).
+
+#### Order Flow with Automatonymous State Machine:
+
+**OrderActor** uses Automatonymous state machine to manage order lifecycle:
+```
+Created → AwaitingStockReservation → StockReserved → PaymentCompleted → Shipped → Delivered
+```
+
+**State Machine Benefits**:
+- **Type-safe transitions**: Automatonymous ensures only valid state changes
+- **Automatic compensation**: State machine triggers compensation on failures  
+- **Event correlation**: Each event maps to specific state transitions
+- **Audit trail**: All state changes are persisted and recoverable
+
+**Implementation Example**:
+```csharp
+public class OrderStateMachine : AutomatonymousStateMachine<OrderSagaData>
+{
+    public OrderStateMachine()
+    {
+        InstanceState(x => x.CurrentState);
+
+        Initially(
+            When(OrderCreatedEvent)
+                .TransitionTo(AwaitingStockReservation)
+                .ThenAsync(context => context.Instance.RequestStockReservations(context))
+        );
+
+        During(AwaitingStockReservation,
+            When(AllStockReservedEvent)
+                .TransitionTo(StockReserved)
+                .ThenAsync(context => context.Instance.RequestPaymentProcessing(context)),
+            When(StockReservationFailedEvent)
+                .TransitionTo(Failed)
+                .ThenAsync(context => context.Instance.HandleFailureCompensation(context))
+        );
+    }
+}
+```
 
 ### Saga Pattern (Orchestration)
 
