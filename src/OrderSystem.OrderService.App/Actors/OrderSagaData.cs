@@ -26,7 +26,7 @@ namespace OrderSystem.OrderService.App.Actors
         public decimal TotalAmount { get; set; }
         public OrderSystem.Contracts.Models.Address ShippingAddress { get; set; } = new("", "", "", "", "");
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
-        
+
         // Process Data
         public string? PaymentId { get; set; }
         public string? ShipmentId { get; set; }
@@ -40,72 +40,72 @@ namespace OrderSystem.OrderService.App.Actors
 
         public async Task RequestStockReservations(BehaviorContext<OrderSagaData> context)
         {
-            foreach (var item in Items)
+            foreach (var item in this.Items)
             {
-                var reserveStockCmd = new ReserveStock(item.ProductId, OrderId, item.Quantity, OrderId);
-                ActorContext?.System.EventStream.Publish(reserveStockCmd);
+                var reserveStockCmd = new ReserveStock(item.ProductId, this.OrderId, item.Quantity, this.OrderId);
+                this.ActorContext?.System.EventStream.Publish(reserveStockCmd);
             }
             await Task.CompletedTask;
         }
 
         public async Task RequestPaymentProcessing(BehaviorContext<OrderSagaData> context)
         {
-            PaymentId = Guid.NewGuid().ToString();
-            LastUpdated = DateTime.UtcNow;
-            
+            this.PaymentId = Guid.NewGuid().ToString();
+            this.LastUpdated = DateTime.UtcNow;
+
             var processPaymentCmd = new ProcessPayment(
-                PaymentId, 
-                OrderId, 
-                CustomerId, 
-                TotalAmount, 
-                new PaymentMethod("CreditCard"), 
-                OrderId);
-                
-            ActorContext?.System.EventStream.Publish(processPaymentCmd);
+                this.PaymentId,
+                this.OrderId,
+                this.CustomerId,
+                this.TotalAmount,
+                new PaymentMethod("CreditCard"),
+                this.OrderId);
+
+            this.ActorContext?.System.EventStream.Publish(processPaymentCmd);
             await Task.CompletedTask;
         }
 
         public async Task RequestShipment(BehaviorContext<OrderSagaData> context)
         {
-            ShipmentId = Guid.NewGuid().ToString();
-            LastUpdated = DateTime.UtcNow;
-            
+            this.ShipmentId = Guid.NewGuid().ToString();
+            this.LastUpdated = DateTime.UtcNow;
+
             var createShipmentCmd = new CreateShipment(
-                ShipmentId, 
-                OrderId, 
-                Items, 
-                ShippingAddress, 
-                OrderId);
-                
-            ActorContext?.System.EventStream.Publish(createShipmentCmd);
+                this.ShipmentId,
+                this.OrderId,
+                this.Items,
+                this.ShippingAddress,
+                this.OrderId);
+
+            this.ActorContext?.System.EventStream.Publish(createShipmentCmd);
             await Task.CompletedTask;
         }
 
         public async Task HandleFailureCompensation(BehaviorContext<OrderSagaData> context)
         {
             // Release stock reservations
-            foreach (var productId in ReservedProducts)
+            foreach (var productId in this.ReservedProducts)
             {
-                var releaseStockCmd = new ReleaseStock(productId, OrderId, OrderId);
-                ActorContext?.System.EventStream.Publish(releaseStockCmd);
+                var releaseStockCmd = new ReleaseStock(productId, this.OrderId, this.OrderId);
+                this.ActorContext?.System.EventStream.Publish(releaseStockCmd);
             }
 
             // Refund payment if it was processed
-            if (!string.IsNullOrEmpty(PaymentId))
+            if (!string.IsNullOrEmpty(this.PaymentId))
             {
-                var refundPaymentCmd = new RefundPayment(PaymentId, null, OrderId);
-                ActorContext?.System.EventStream.Publish(refundPaymentCmd);
+                var refundPaymentCmd = new RefundPayment(this.PaymentId, null, this.OrderId);
+                this.ActorContext?.System.EventStream.Publish(refundPaymentCmd);
             }
 
-            Status = OrderStatus.PaymentFailed;
-            LastUpdated = DateTime.UtcNow;
+            this.Status = OrderStatus.PaymentFailed;
+            this.LastUpdated = DateTime.UtcNow;
             await Task.CompletedTask;
         }
 
         public async Task HandleCancellationCompensation(BehaviorContext<OrderSagaData> context)
         {
-            await HandleFailureCompensation(context);
-            Status = OrderStatus.Cancelled;
+            await this.HandleFailureCompensation(context);
+            this.Status = OrderStatus.Cancelled;
         }
     }
 

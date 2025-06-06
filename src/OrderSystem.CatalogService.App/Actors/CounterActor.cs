@@ -48,10 +48,11 @@ namespace OrderSystem.CatalogService.App.Actors
         // currently, do not persist subscribers, but would be easy to add
         private readonly HashSet<IActorRef> subscribers = new();
         private Counter counter;
-        private readonly ILoggingAdapter log = Context.GetLogger();
+        private readonly ILoggingAdapter log;
 
         public CounterActor(string counterName)
         {
+            this.log = Context.GetLogger();
             // distinguish both type and entity Id in the EventJournal
             this.PersistenceId = $"Counter_{counterName}";
             this.counter = new Counter(counterName, 0);
@@ -77,12 +78,12 @@ namespace OrderSystem.CatalogService.App.Actors
             {
                 this.subscribers.Add(subscribe.Subscriber);
                 this.Sender.Tell(new CounterCommandResponse(this.counter.CounterId, true));
-                UntypedPersistentActor.Context.Watch(subscribe.Subscriber);
+                Context.Watch(subscribe.Subscriber);
             });
 
             this.Command<UnsubscribeToCounter>(counter =>
             {
-                UntypedPersistentActor.Context.Unwatch(counter.Subscriber);
+                Context.Unwatch(counter.Subscriber);
                 this.subscribers.Remove(counter.Subscriber);
             });
 

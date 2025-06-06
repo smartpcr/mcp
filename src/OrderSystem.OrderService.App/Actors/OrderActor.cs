@@ -14,7 +14,6 @@ namespace OrderSystem.OrderService.App.Actors
     using Akka.Event;
     using Akka.Persistence;
     using Automatonymous;
-    using OrderSystem.Contracts.Messages;
     using OrderSystem.Contracts.Models;
     using Shared.Contracts.Messages;
 
@@ -31,8 +30,8 @@ namespace OrderSystem.OrderService.App.Actors
             this.log = Context.GetLogger();
             this.orderId = orderId;
             this.stateMachine = new OrderStateMachine();
-            this.sagaData = new OrderSagaData 
-            { 
+            this.sagaData = new OrderSagaData
+            {
                 CorrelationId = Guid.NewGuid(),
                 OrderId = orderId,
                 ActorContext = Context
@@ -66,24 +65,21 @@ namespace OrderSystem.OrderService.App.Actors
 
         private void SetupEventSubscriptions()
         {
-            // Subscribe to events from other services for choreography
-            Context.System.EventStream.Subscribe(Self, typeof(StockReservedEvent));
-            Context.System.EventStream.Subscribe(Self, typeof(StockReservationFailedEvent));
-            Context.System.EventStream.Subscribe(Self, typeof(PaymentSucceededEvent));
-            Context.System.EventStream.Subscribe(Self, typeof(PaymentFailedEvent));
-            Context.System.EventStream.Subscribe(Self, typeof(ShipmentScheduledEvent));
-            Context.System.EventStream.Subscribe(Self, typeof(ShipmentFailedEvent));
-
-            // Handle subscribed events
-            this.Command<StockReservedEvent>(this.Handle);
-            this.Command<StockReservationFailedEvent>(this.Handle);
-            this.Command<PaymentSucceededEvent>(this.Handle);
-            this.Command<PaymentFailedEvent>(this.Handle);
-            this.Command<ShipmentScheduledEvent>(this.Handle);
-            this.Command<ShipmentFailedEvent>(this.Handle);
+            this.SubscribeEvent<StockReservedEvent>(this.Handle);
+            this.SubscribeEvent<StockReservationFailedEvent>(this.Handle);
+            this.SubscribeEvent<PaymentSucceededEvent>(this.Handle);
+            this.SubscribeEvent<PaymentFailedEvent>(this.Handle);
+            this.SubscribeEvent<ShipmentScheduledEvent>(this.Handle);
+            this.SubscribeEvent<ShipmentFailedEvent>(this.Handle);
         }
 
-        private async void Handle(CreateOrder cmd)
+        private void SubscribeEvent<T>(Func<T, Task> handler)
+        {
+            Context.System.EventStream.Subscribe(this.Self, typeof(T));
+            this.CommandAsync<T>(handler);
+        }
+
+        private void Handle(CreateOrder cmd)
         {
             if (this.IsCommandProcessed(cmd.CorrelationId))
             {
@@ -123,7 +119,7 @@ namespace OrderSystem.OrderService.App.Actors
             });
         }
 
-        private async void Handle(CancelOrder cmd)
+        private void Handle(CancelOrder cmd)
         {
             if (this.IsCommandProcessed(cmd.CorrelationId)) return;
 
@@ -146,7 +142,7 @@ namespace OrderSystem.OrderService.App.Actors
         }
 
         // Handle events from other services (choreography)
-        private async void Handle(StockReservedEvent evt)
+        private async Task Handle(StockReservedEvent evt)
         {
             if (evt.OrderId != this.orderId) return;
 
@@ -154,7 +150,7 @@ namespace OrderSystem.OrderService.App.Actors
 
             // Check if all items are reserved
             var allReserved = this.sagaData.Items.All(item => this.sagaData.ReservedProducts.Contains(item.ProductId));
-            
+
             if (allReserved)
             {
                 var stockReservationData = new StockReservationData
@@ -169,7 +165,7 @@ namespace OrderSystem.OrderService.App.Actors
             }
         }
 
-        private async void Handle(StockReservationFailedEvent evt)
+        private async Task Handle(StockReservationFailedEvent evt)
         {
             if (evt.OrderId != this.orderId) return;
 
@@ -185,7 +181,7 @@ namespace OrderSystem.OrderService.App.Actors
             this.UpdateOrderStatus(OrderStatus.OutOfStock, $"Stock reservation failed: {evt.Reason}");
         }
 
-        private async void Handle(PaymentSucceededEvent evt)
+        private async Task Handle(PaymentSucceededEvent evt)
         {
             if (evt.PaymentId != this.sagaData.PaymentId) return;
 
@@ -201,7 +197,7 @@ namespace OrderSystem.OrderService.App.Actors
             this.UpdateOrderStatus(OrderStatus.PaymentConfirmed, "Payment completed");
         }
 
-        private async void Handle(PaymentFailedEvent evt)
+        private async Task Handle(PaymentFailedEvent evt)
         {
             if (evt.PaymentId != this.sagaData.PaymentId) return;
 
@@ -217,7 +213,7 @@ namespace OrderSystem.OrderService.App.Actors
             this.UpdateOrderStatus(OrderStatus.PaymentFailed, $"Payment failed: {evt.Reason}");
         }
 
-        private async void Handle(ShipmentScheduledEvent evt)
+        private async Task Handle(ShipmentScheduledEvent evt)
         {
             if (evt.ShipmentId != this.sagaData.ShipmentId) return;
 
@@ -233,7 +229,7 @@ namespace OrderSystem.OrderService.App.Actors
             this.UpdateOrderStatus(OrderStatus.Shipped, "Shipment scheduled");
         }
 
-        private async void Handle(ShipmentFailedEvent evt)
+        private async Task Handle(ShipmentFailedEvent evt)
         {
             if (evt.ShipmentId != this.sagaData.ShipmentId) return;
 
@@ -310,3 +306,5 @@ namespace OrderSystem.OrderService.App.Actors
         }
     }
 }
+
+

@@ -46,7 +46,17 @@
       "Bash(dotnet remove src/OrderSystem.OrderService.App/OrderSystem.OrderService.App.csproj package Stateless)",
       "Bash(dotnet remove:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(dotnet exec:*)"
+      "Bash(dotnet exec:*)",
+      "Bash(/home/xd/.nvm/versions/node/v22.16.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg \"this\\.Context\" --line-number)",
+      "Bash(/home/xd/.nvm/versions/node/v22.16.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n \"private\\s+(readonly\\s+)?[a-zA-Z0-9<>\\[\\],\\s]+\\s+_[a-zA-Z]\" /mnt/e/work/github/crp/mcp/src --type cs)",
+      "Bash(/home/xd/.nvm/versions/node/v22.16.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n \"private\\s+[^=;]+_[a-zA-Z]\" /mnt/e/work/github/crp/mcp/src --type cs)",
+      "Bash(/home/xd/.nvm/versions/node/v22.16.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n \"_[a-zA-Z][a-zA-Z0-9]*[^a-zA-Z0-9_]\" /mnt/e/work/github/crp/mcp/src --type cs)",
+      "Bash(/home/xd/.nvm/versions/node/v22.16.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -A1 -B1 \"private.*_[a-zA-Z]\" /mnt/e/work/github/crp/mcp/src --type cs)",
+      "Bash(/home/xd/.nvm/versions/node/v22.16.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -A1 -B1 \"private.*_[a-zA-Z]\" /mnt/e/work/github/crp/mcp/src/OrderSystem.CustomerService.App --type cs)",
+      "Bash(/home/xd/.nvm/versions/node/v22.16.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg \"private.*_[a-zA-Z]\" /mnt/e/work/github/crp/mcp/src/OrderSystem.CustomerService.App --type cs)",
+      "Bash(/home/xd/.nvm/versions/node/v22.16.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg \"this._\" /mnt/e/work/github/crp/mcp/src --type cs)",
+      "Bash(/home/xd/.nvm/versions/node/v22.16.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg \"\\b_[a-zA-Z]\" /mnt/e/work/github/crp/mcp/src --type cs)",
+      "Bash(/home/xd/.nvm/versions/node/v22.16.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg \"private.*_[a-zA-Z]\" /mnt/e/work/github/crp/mcp/src/CatalogService /mnt/e/work/github/crp/mcp/src/CustomerService /mnt/e/work/github/crp/mcp/src/OrderService /mnt/e/work/github/crp/mcp/src/PaymentService /mnt/e/work/github/crp/mcp/src/ShipmentService /mnt/e/work/github/crp/mcp/src/OrderSystem.Api /mnt/e/work/github/crp/mcp/src/OrderSystem.Core --type cs 2>/dev/null)"
     ],
     "deny": []
   }

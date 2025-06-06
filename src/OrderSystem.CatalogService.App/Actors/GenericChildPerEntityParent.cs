@@ -39,7 +39,7 @@ namespace OrderSystem.CatalogService.App.Actors
                 var entityId = this.extractor.EntityId(o);
                 if (string.IsNullOrEmpty(entityId))
                     return;
-                UntypedActor.Context.Child(entityId).GetOrElse(() => UntypedActor.Context.ActorOf(this.propsFactory(entityId), entityId))
+                Context.Child(entityId).GetOrElse(() => Context.ActorOf(this.propsFactory(entityId), entityId))
                     .Forward(this.extractor.EntityMessage(o));
             });
         }

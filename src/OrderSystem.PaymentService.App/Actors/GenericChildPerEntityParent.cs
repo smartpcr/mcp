@@ -26,21 +26,21 @@ public sealed class GenericChildPerEntityParent : ReceiveActor
     /*
      * Re-use Akka.Cluster.Sharding's infrastructure here to keep things simple.
      */
-    private readonly IMessageExtractor _extractor;
-    private Func<string, Props> _propsFactory;
+    private readonly IMessageExtractor extractor;
+    private Func<string, Props> propsFactory;
 
     public GenericChildPerEntityParent(IMessageExtractor extractor, Func<string, Props> propsFactory)
     {
-        _extractor = extractor;
-        _propsFactory = propsFactory;
+        this.extractor = extractor;
+        this.propsFactory = propsFactory;
 
         ReceiveAny(o =>
         {
-            var entityId = _extractor.EntityId(o);
+            var entityId = this.extractor.EntityId(o);
             if (string.IsNullOrEmpty(entityId))
                 return;
             Context.Child(entityId).GetOrElse(() => Context.ActorOf(propsFactory(entityId), entityId))
-                .Forward(_extractor.EntityMessage(o));
+                .Forward(this.extractor.EntityMessage(o));
         });
     }
 }

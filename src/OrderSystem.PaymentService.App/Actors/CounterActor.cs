@@ -46,49 +46,49 @@ public static class CounterExtensions
 public sealed class CounterActor : ReceivePersistentActor
 {
     // currently, do not persist subscribers, but would be easy to add
-    private readonly HashSet<IActorRef> _subscribers = new();
-    private Counter _counter;
-    private readonly ILoggingAdapter _log = Context.GetLogger();
+    private readonly HashSet<IActorRef> subscribers = new();
+    private Counter counter;
+    private readonly ILoggingAdapter log = Context.GetLogger();
 
     public CounterActor(string counterName)
     {
         // distinguish both type and entity Id in the EventJournal
         PersistenceId = $"Counter_{counterName}";
-        _counter = new Counter(counterName, 0);
+        this.counter = new Counter(counterName, 0);
 
 
         Recover<SnapshotOffer>(offer =>
         {
             if (offer.Snapshot is Counter c)
             {
-                _counter = c;
-                _log.Info("Recovered initial count value of [{0}]", c);
+                this.counter = c;
+                this.log.Info("Recovered initial count value of [{0}]", c);
             }
         });
 
         Recover<ICounterEvent>(@event =>
         {
-            _counter = _counter.ApplyEvent(@event);
+            this.counter = this.counter.ApplyEvent(@event);
         });
 
-        Command<FetchCounter>(f => Sender.Tell(_counter));
+        Command<FetchCounter>(f => Sender.Tell(this.counter));
 
         Command<SubscribeToCounter>(subscribe =>
         {
-            _subscribers.Add(subscribe.Subscriber);
-            Sender.Tell(new CounterCommandResponse(_counter.CounterId, true));
+            this.subscribers.Add(subscribe.Subscriber);
+            Sender.Tell(new CounterCommandResponse(this.counter.CounterId, true));
             Context.Watch(subscribe.Subscriber);
         });
 
         Command<UnsubscribeToCounter>(counter =>
         {
             Context.Unwatch(counter.Subscriber);
-            _subscribers.Remove(counter.Subscriber);
+            this.subscribers.Remove(counter.Subscriber);
         });
 
         Command<ICounterCommand>(cmd =>
         {
-            var response = _counter.ProcessCommand(cmd);
+            var response = this.counter.ProcessCommand(cmd);
 
             if (!response.IsSuccess)
             {
@@ -100,12 +100,12 @@ public sealed class CounterActor : ReceivePersistentActor
             {
                 Persist(response.Event, @event =>
                 {
-                    _counter = _counter.ApplyEvent(@event);
-                    _log.Info("Updated counter via {0} - new value is {1}", @event, _counter.CurrentValue);
+                    this.counter = this.counter.ApplyEvent(@event);
+                    this.log.Info("Updated counter via {0} - new value is {1}", @event, this.counter.CurrentValue);
                     Sender.Tell(response);
 
                     // push events to all subscribers
-                    foreach (var s in _subscribers)
+                    foreach (var s in this.subscribers)
                     {
                         s.Tell(@event);
                     }
@@ -126,7 +126,7 @@ public sealed class CounterActor : ReceivePersistentActor
         // save a new snapshot every 25 events, in order to keep recovery times bounded
         if (LastSequenceNr % 25 == 0)
         {
-            SaveSnapshot(_counter);
+            SaveSnapshot(this.counter);
         }
     }
 
