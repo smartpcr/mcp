@@ -13,6 +13,7 @@ namespace OrderSystem.CustomerService.Tests.Actors
     using OrderSystem.Contracts.Models;
     using OrderSystem.CustomerService.App.Actors;
     using Xunit;
+    using Address = OrderSystem.Contracts.Models.Address;
 
     public class CustomerActorTests : TestKit
     {
@@ -58,7 +59,7 @@ namespace OrderSystem.CustomerService.Tests.Actors
             // Arrange
             var customerId = "test-customer-123";
             var customerActor = this.ActorOf(Props.Create(() => new CustomerActor(customerId)));
-            
+
             // Create customer first
             var createCommand = new CreateCustomer(customerId, "test@example.com", "John Doe");
             customerActor.Tell(createCommand);
@@ -95,7 +96,7 @@ namespace OrderSystem.CustomerService.Tests.Actors
             // Arrange
             var customerId = "test-customer-123";
             var customerActor = this.ActorOf(Props.Create(() => new CustomerActor(customerId)));
-            
+
             // Create customer first
             var createCommand = new CreateCustomer(customerId, "test@example.com", "John Doe");
             customerActor.Tell(createCommand);
@@ -136,7 +137,7 @@ namespace OrderSystem.CustomerService.Tests.Actors
             // Arrange
             var customerId = "test-customer-123";
             var customerActor = this.ActorOf(Props.Create(() => new CustomerActor(customerId)));
-            
+
             // Create customer first
             var createCommand = new CreateCustomer(customerId, "test@example.com", "John Doe");
             customerActor.Tell(createCommand);
@@ -158,7 +159,7 @@ namespace OrderSystem.CustomerService.Tests.Actors
             // Arrange
             var customerId = "test-customer-123";
             var customerActor = this.ActorOf(Props.Create(() => new CustomerActor(customerId)));
-            
+
             // Create customer first
             var createCommand = new CreateCustomer(customerId, "test@example.com", "John Doe");
             customerActor.Tell(createCommand);

@@ -22,12 +22,12 @@ namespace OrderSystem.ShipmentService.Tests.Messages
             var address = new Address("123 Main St", "City", "State", "12345");
 
             // Act
-            var command = new CreateShipment("ship-123", "order-456", address);
+            var command = new CreateShipment("ship-123", "order-456", new List<OrderItem>(), address);
 
             // Assert
             command.ShipmentId.Should().Be("ship-123");
             command.OrderId.Should().Be("order-456");
-            command.ShippingAddress.Should().Be(address);
+            command.Address.Should().Be(address);
             command.CorrelationId.Should().NotBeNullOrEmpty();
             Guid.TryParse(command.CorrelationId, out _).Should().BeTrue();
         }
@@ -40,7 +40,7 @@ namespace OrderSystem.ShipmentService.Tests.Messages
             var correlationId = "custom-correlation-789";
 
             // Act
-            var command = new CreateShipment("ship-123", "order-456", address, correlationId);
+            var command = new CreateShipment("ship-123", "order-456", new List<OrderItem>(), address, correlationId);
 
             // Assert
             command.CorrelationId.Should().Be(correlationId);
@@ -67,12 +67,12 @@ namespace OrderSystem.ShipmentService.Tests.Messages
             var createdAt = DateTime.UtcNow;
 
             // Act
-            var evt = new ShipmentCreatedEvent("ship-123", "order-456", address, createdAt);
+            var evt = new ShipmentCreatedEvent("ship-123", "order-456", new List<OrderItem>(), address, createdAt);
 
             // Assert
             evt.ShipmentId.Should().Be("ship-123");
             evt.OrderId.Should().Be("order-456");
-            evt.ShippingAddress.Should().Be(address);
+            evt.Address.Should().Be(address);
             evt.CreatedAt.Should().Be(createdAt);
             evt.Should().BeAssignableTo<IShipmentEvent>();
         }
@@ -84,12 +84,11 @@ namespace OrderSystem.ShipmentService.Tests.Messages
             var updatedAt = DateTime.UtcNow;
 
             // Act
-            var evt = new ShipmentStatusUpdatedEvent("ship-123", "Pending", "InTransit", "Chicago Hub", updatedAt);
+            var evt = new ShipmentStatusUpdatedEvent("ship-123", "Pending", "Chicago Hub", updatedAt);
 
             // Assert
             evt.ShipmentId.Should().Be("ship-123");
-            evt.PreviousStatus.Should().Be("Pending");
-            evt.NewStatus.Should().Be("InTransit");
+            evt.Status.Should().Be("Pending");
             evt.Location.Should().Be("Chicago Hub");
             evt.UpdatedAt.Should().Be(updatedAt);
             evt.Should().BeAssignableTo<IShipmentEvent>();

@@ -39,7 +39,7 @@ namespace OrderSystem.CustomerService.Tests.Actors
             var counterActor = this.ActorOf(Props.Create(() => new CounterActor(counterName)));
 
             // Act
-            counterActor.Tell(new IncrementCounterCommand(counterName));
+            counterActor.Tell(new IncrementCounterCommand(counterName, 1));
 
             // Assert
             var response = this.ExpectMsg<CounterCommandResponse>();
@@ -60,7 +60,7 @@ namespace OrderSystem.CustomerService.Tests.Actors
             var counterActor = this.ActorOf(Props.Create(() => new CounterActor(counterName)));
 
             // First increment to have a positive value
-            counterActor.Tell(new IncrementCounterCommand(counterName));
+            counterActor.Tell(new IncrementCounterCommand(counterName, 1));
             this.ExpectMsg<CounterCommandResponse>();
 
             // Act
@@ -128,7 +128,7 @@ namespace OrderSystem.CustomerService.Tests.Actors
             this.ExpectMsg<CounterCommandResponse>();
 
             // Act
-            counterActor.Tell(new IncrementCounterCommand(counterName));
+            counterActor.Tell(new IncrementCounterCommand(counterName, 1));
 
             // Assert
             this.ExpectMsg<CounterCommandResponse>();
@@ -151,7 +151,7 @@ namespace OrderSystem.CustomerService.Tests.Actors
             counterActor.Tell(new UnsubscribeToCounter(counterName, subscriber));
 
             // Increment after unsubscribe
-            counterActor.Tell(new IncrementCounterCommand(counterName));
+            counterActor.Tell(new IncrementCounterCommand(counterName, 1));
             this.ExpectMsg<CounterCommandResponse>();
 
             // Assert - subscriber should not receive notification
@@ -166,9 +166,9 @@ namespace OrderSystem.CustomerService.Tests.Actors
             var counterActor = this.ActorOf(Props.Create(() => new CounterActor(counterName)));
 
             // Act
-            for (int i = 0; i < 5; i++)
+            for (var i = 0; i < 5; i++)
             {
-                counterActor.Tell(new IncrementCounterCommand(counterName));
+                counterActor.Tell(new IncrementCounterCommand(counterName, 1));
                 this.ExpectMsg<CounterCommandResponse>();
             }
 

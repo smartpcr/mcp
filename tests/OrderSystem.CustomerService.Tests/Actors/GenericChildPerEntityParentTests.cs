@@ -43,6 +43,10 @@ namespace OrderSystem.CustomerService.Tests.Actors
             public object EntityMessage(object message) => message;
 
             public string ShardId(object message) => this.EntityId(message);
+            public string ShardId(string entityId, object? messageHint = null)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class TestChildActor : ReceiveActor
