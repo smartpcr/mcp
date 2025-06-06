@@ -1,56 +1,62 @@
-using Akka.Actor;
-using Akka.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using OrderSystem.ShipmentService.App.Actors;
+// -----------------------------------------------------------------------
+// <copyright file="CounterController.cs" company="The NBS Project">
+// Copyright (c) The NBS Project. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
-namespace OrderSystem.ShipmentService.App.Controllers;
-
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using OrderSystem.Contracts.Messages;
-
-[ApiController]
-[Route("[controller]")]
-public class CounterController : ControllerBase
+namespace OrderSystem.ShipmentService.App.Controllers
 {
-    private readonly ILogger<CounterController> _logger;
-    private readonly IActorRef _counterActor;
+    using System;
+    using System.Threading.Tasks;
+    using Akka.Actor;
+    using Akka.Hosting;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Logging;
+    using OrderSystem.Contracts.Messages;
+    using OrderSystem.ShipmentService.App.Actors;
 
-    public CounterController(ILogger<CounterController> logger, IRequiredActor<CounterActor> counterActor)
+    [ApiController]
+    [Route("[controller]")]
+    public class CounterController : ControllerBase
     {
-        _logger = logger;
-        _counterActor = counterActor.ActorRef;
-    }
+        private readonly ILogger<CounterController> _logger;
+        private readonly IActorRef _counterActor;
 
-    [HttpGet("{counterId}")]
-    public async Task<OrderSystem.ShipmentService.App.Actors.Counter> Get(string counterId)
-    {
-        var counter = await _counterActor.Ask<OrderSystem.ShipmentService.App.Actors.Counter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5));
-        return counter;
-    }
-
-    [HttpPost("{counterId}")]
-    public async Task<IActionResult> Post(string counterId, [FromBody] int increment)
-    {
-        var result = await _counterActor.Ask<CounterCommandResponse>(new IncrementCounterCommand(counterId, increment), TimeSpan.FromSeconds(5));
-        if (!result.IsSuccess)
+        public CounterController(ILogger<CounterController> logger, IRequiredActor<CounterActor> counterActor)
         {
-            return BadRequest();
+            _logger = logger;
+            _counterActor = counterActor.ActorRef;
         }
 
-        return Ok(result.Event);
-    }
-
-    [HttpPut("{counterId}")]
-    public async Task<IActionResult> Put(string counterId, [FromBody] int counterValue)
-    {
-        var result = await _counterActor.Ask<CounterCommandResponse>(new SetCounterCommand(counterId, counterValue), TimeSpan.FromSeconds(5));
-        if (!result.IsSuccess)
+        [HttpGet("{counterId}")]
+        public async Task<OrderSystem.ShipmentService.App.Actors.Counter> Get(string counterId)
         {
-            return BadRequest();
+            var counter = await _counterActor.Ask<OrderSystem.ShipmentService.App.Actors.Counter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5));
+            return counter;
         }
 
-        return Ok(result.Event);
+        [HttpPost("{counterId}")]
+        public async Task<IActionResult> Post(string counterId, [FromBody] int increment)
+        {
+            var result = await _counterActor.Ask<CounterCommandResponse>(new IncrementCounterCommand(counterId, increment), TimeSpan.FromSeconds(5));
+            if (!result.IsSuccess)
+            {
+                return BadRequest();
+            }
+
+            return Ok(result.Event);
+        }
+
+        [HttpPut("{counterId}")]
+        public async Task<IActionResult> Put(string counterId, [FromBody] int counterValue)
+        {
+            var result = await _counterActor.Ask<CounterCommandResponse>(new SetCounterCommand(counterId, counterValue), TimeSpan.FromSeconds(5));
+            if (!result.IsSuccess)
+            {
+                return BadRequest();
+            }
+
+            return Ok(result.Event);
+        }
     }
 }

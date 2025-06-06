@@ -1,8 +1,14 @@
-﻿using System.Net;
-using Akka.Cluster.Hosting;
-using Akka.Remote.Hosting;
+// -----------------------------------------------------------------------
+// <copyright file="AkkaSettings.cs" company="Microsoft Corp.">
+//     Copyright (c) Microsoft Corp. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace OrderSystem.PaymentService.App.Configuration;
+
+using System.Net;
+using Akka.Cluster.Hosting;
+using Akka.Remote.Hosting;
 
 public class AkkaManagementOptions
 {

@@ -1,11 +1,16 @@
-﻿using Akka.Actor;
-using Akka.Event;
-using Akka.Persistence;
+// -----------------------------------------------------------------------
+// <copyright file="CounterActor.cs" company="Microsoft Corp.">
+//     Copyright (c) Microsoft Corp. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace OrderSystem.PaymentService.App.Actors;
 
 using System;
 using System.Collections.Generic;
+using Akka.Actor;
+using Akka.Event;
+using Akka.Persistence;
 using OrderSystem.Contracts.Messages;
 
 public record Counter(string CounterId, int CurrentValue)

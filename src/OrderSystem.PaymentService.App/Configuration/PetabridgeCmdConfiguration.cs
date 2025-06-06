@@ -1,10 +1,16 @@
-﻿using Akka.Hosting;
+// -----------------------------------------------------------------------
+// <copyright file="PetabridgeCmdConfiguration.cs" company="Microsoft Corp.">
+//     Copyright (c) Microsoft Corp. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace OrderSystem.PaymentService.App.Configuration;
+
+using Akka.Hosting;
 using Petabridge.Cmd.Cluster;
 using Petabridge.Cmd.Cluster.Sharding;
 using Petabridge.Cmd.Host;
 using Petabridge.Cmd.Remote;
-
-namespace OrderSystem.PaymentService.App.Configuration;
 
 public static class PetabridgeCmdConfiguration
 {

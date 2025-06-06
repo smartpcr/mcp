@@ -1,9 +1,14 @@
-﻿using Akka.Actor;
-using Akka.Cluster.Sharding;
+// -----------------------------------------------------------------------
+// <copyright file="GenericChildPerEntityParent.cs" company="Microsoft Corp.">
+//     Copyright (c) Microsoft Corp. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace OrderSystem.PaymentService.App.Actors;
 
 using System;
+using Akka.Actor;
+using Akka.Cluster.Sharding;
 
 /// <summary>
 /// A generic "child per entity" parent actor.

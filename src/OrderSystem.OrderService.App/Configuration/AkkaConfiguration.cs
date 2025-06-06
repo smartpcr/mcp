@@ -1,4 +1,13 @@
-﻿using System.Diagnostics;
+// -----------------------------------------------------------------------
+// <copyright file="AkkaConfiguration.cs" company="Microsoft Corp.">
+//     Copyright (c) Microsoft Corp. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace OrderSystem.OrderService.App.Configuration;
+
+using System;
+using System.Diagnostics;
 using Akka.Actor;
 using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
@@ -10,14 +19,10 @@ using Akka.Management.Cluster.Bootstrap;
 using Akka.Persistence.Azure.Hosting;
 using Akka.Persistence.Hosting;
 using Akka.Remote.Hosting;
-using OrderSystem.OrderService.App.Actors;
-
-namespace OrderSystem.OrderService.App.Configuration;
-
-using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderSystem.Contracts.Messages;
+using OrderSystem.OrderService.App.Actors;
 
 public static class AkkaConfiguration
 {

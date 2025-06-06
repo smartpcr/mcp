@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="OrderActorWithAutomatonymous.cs" company="Microsoft Corp.">
+// <copyright file="OrderActor.cs" company="Microsoft Corp.">
 //     Copyright (c) Microsoft Corp. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------

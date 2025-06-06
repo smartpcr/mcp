@@ -1,14 +1,19 @@
-using Akka.Actor;
-using Akka.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using OrderSystem.PaymentService.App.Actors;
+// -----------------------------------------------------------------------
+// <copyright file="CounterController.cs" company="Microsoft Corp.">
+//     Copyright (c) Microsoft Corp. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace OrderSystem.PaymentService.App.Controllers;
 
 using System;
 using System.Threading.Tasks;
+using Akka.Actor;
+using Akka.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using OrderSystem.Contracts.Messages;
+using OrderSystem.PaymentService.App.Actors;
 
 [ApiController]
 [Route("[controller]")]
