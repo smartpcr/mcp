@@ -1,10 +1,10 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="GenericChildPerEntityParent.cs" company="Microsoft Corp.">
 //     Copyright (c) Microsoft Corp. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace OrderSystem.CatalogService.App.Actors
+namespace OrderSystem.Infrastructure.Actors
 {
     using System;
     using Akka.Actor;

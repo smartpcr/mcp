@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace OrderSystem.CatalogService.App.Configuration
+namespace OrderSystem.Infrastructure.Configuration
 {
     using Akka.Hosting;
     using Petabridge.Cmd.Cluster;

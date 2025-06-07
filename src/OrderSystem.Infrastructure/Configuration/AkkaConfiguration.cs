@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace OrderSystem.CatalogService.App.Configuration
+namespace OrderSystem.Infrastructure.Configuration
 {
     using System;
     using System.Diagnostics;
@@ -16,7 +16,6 @@ namespace OrderSystem.CatalogService.App.Configuration
     using Akka.Discovery.Config.Hosting;
     using Akka.Hosting;
     using Akka.Management;
-    using Akka.Management.Cluster.Bootstrap;
     using Akka.Persistence.Azure;
     using Akka.Persistence.Azure.Hosting;
     using Akka.Persistence.Hosting;
@@ -24,12 +23,12 @@ namespace OrderSystem.CatalogService.App.Configuration
     using Akka.Util;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using OrderSystem.CatalogService.App.Actors;
     using OrderSystem.Contracts.Messages;
+    using OrderSystem.Infrastructure.Actors;
 
     public static class AkkaConfiguration
     {
-        public static IServiceCollection ConfigureWebApiAkka(this IServiceCollection services, IConfiguration configuration,
+        public static IServiceCollection ConfigureOrderSystemAkka(this IServiceCollection services, IConfiguration configuration,
             Action<AkkaConfigurationBuilder, IServiceProvider> additionalConfig)
         {
             var akkaSettings = configuration.GetRequiredSection("AkkaSettings").Get<AkkaSettings>();
@@ -56,8 +55,7 @@ namespace OrderSystem.CatalogService.App.Configuration
                     configBuilder.AddLoggerFactory();
                 })
                 .ConfigureNetwork(sp)
-                .ConfigurePersistence(sp)
-                .ConfigureCounterActors(sp);
+                .ConfigurePersistence(sp);
         }
 
         public static AkkaConfigurationBuilder ConfigureNetwork(this AkkaConfigurationBuilder builder,
@@ -81,10 +79,7 @@ namespace OrderSystem.CatalogService.App.Configuration
                 builder
                     .WithClustering(clusterOptions)
                     .WithAkkaManagement(hostName: settings.AkkaManagementOptions.Hostname,
-                        settings.AkkaManagementOptions.Port)
-                    .WithClusterBootstrap(serviceName: settings.AkkaManagementOptions.ServiceName,
-                        portName: settings.AkkaManagementOptions.PortName,
-                        requiredContactPoints: settings.AkkaManagementOptions.RequiredContactPointsNr);
+                        settings.AkkaManagementOptions.Port);
 
                 switch (settings.AkkaManagementOptions.DiscoveryMethod)
                 {
@@ -161,39 +156,34 @@ namespace OrderSystem.CatalogService.App.Configuration
             }
         }
 
-        public static AkkaConfigurationBuilder ConfigureCounterActors(this AkkaConfigurationBuilder builder,
+        public static AkkaConfigurationBuilder ConfigureShardedActors<TActor>(this AkkaConfigurationBuilder builder,
+            string regionName,
+            Func<string, Props> actorPropsFactory,
+            HashCodeMessageExtractor messageExtractor,
             IServiceProvider serviceProvider)
+            where TActor : ActorBase
         {
             var settings = serviceProvider.GetRequiredService<AkkaSettings>();
-            var extractor = CreateCounterMessageRouter();
 
             if (settings.UseClustering)
             {
-                return builder.WithShardRegion<CounterActor>("counter",
-                    (system, registry, resolver) => s => Props.Create(() => new CounterActor(s)),
-                    extractor, settings.ShardOptions);
+                return builder.WithShardRegion<TActor>(regionName,
+                    (system, registry, resolver) => actorPropsFactory,
+                    messageExtractor, settings.ShardOptions);
             }
 
             return builder.WithActors((system, registry, resolver) =>
             {
-                var parent =
-                    system.ActorOf(
-                        GenericChildPerEntityParent.Props(extractor, s => Props.Create(() => new CounterActor(s))),
-                        "counters");
-                registry.Register<CounterActor>(parent);
+                var parent = system.ActorOf(
+                    GenericChildPerEntityParent.Props(messageExtractor, actorPropsFactory),
+                    regionName);
+                registry.Register<TActor>(parent);
             });
         }
 
-        public static HashCodeMessageExtractor CreateCounterMessageRouter()
+        public static HashCodeMessageExtractor CreateMessageExtractor<TMessage>(int maxShards, Func<object, string?> entityIdExtractor)
         {
-            return HashCodeMessageExtractor.Create(30, o =>
-            {
-                return o switch
-                {
-                    IWithCounterId counterId => counterId.CounterId,
-                    _ => null
-                };
-            }, o => o);
+            return HashCodeMessageExtractor.Create(maxShards, entityIdExtractor, o => o);
         }
     }
 }

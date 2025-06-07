@@ -8,55 +8,59 @@ namespace OrderSystem.CatalogService.App.Controllers
 {
     using System;
     using System.Threading.Tasks;
-    using Akka.Actor;
     using Akka.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using OrderSystem.CatalogService.App.Actors;
-    using OrderSystem.Contracts.Messages;
+    using OrderSystem.Infrastructure.Controllers;
 
     [ApiController]
     [Route("[controller]")]
     public class CounterController : ControllerBase
     {
-        private readonly ILogger<CounterController> logger;
-        private readonly IActorRef counterActor;
+        private readonly BaseCounterController<CounterActor, Counter> baseController;
 
         public CounterController(ILogger<CounterController> logger, IRequiredActor<CounterActor> counterActor)
         {
-            this.logger = logger;
-            this.counterActor = counterActor.ActorRef;
+            baseController = new InnerCounterController(logger, counterActor);
+        }
+
+        private class InnerCounterController : BaseCounterController<CounterActor, Counter>
+        {
+            public InnerCounterController(ILogger logger, IRequiredActor<CounterActor> counterActor)
+                : base(logger, counterActor)
+            {
+            }
         }
 
         [HttpGet("{counterId}")]
-        public async Task<OrderSystem.CatalogService.App.Actors.Counter> Get(string counterId)
+        public async Task<Counter> Get(string counterId)
         {
-            var counter = await this.counterActor.Ask<OrderSystem.CatalogService.App.Actors.Counter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5));
-            return counter;
+            return await baseController.GetCounter(counterId);
         }
 
         [HttpPost("{counterId}")]
         public async Task<IActionResult> Post(string counterId, [FromBody] int increment)
         {
-            var result = await this.counterActor.Ask<CounterCommandResponse>(new IncrementCounterCommand(counterId, increment), TimeSpan.FromSeconds(5));
+            var result = await baseController.IncrementCounter(counterId, increment);
             if (!result.IsSuccess)
             {
-                return this.BadRequest();
+                return BadRequest();
             }
 
-            return this.Ok(result.Event);
+            return Ok(result.Event);
         }
 
         [HttpPut("{counterId}")]
         public async Task<IActionResult> Put(string counterId, [FromBody] int counterValue)
         {
-            var result = await this.counterActor.Ask<CounterCommandResponse>(new SetCounterCommand(counterId, counterValue), TimeSpan.FromSeconds(5));
+            var result = await baseController.SetCounter(counterId, counterValue);
             if (!result.IsSuccess)
             {
-                return this.BadRequest();
+                return BadRequest();
             }
 
-            return this.Ok(result.Event);
+            return Ok(result.Event);
         }
     }
 }

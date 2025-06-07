@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace OrderSystem.CatalogService.App.Configuration
+namespace OrderSystem.Infrastructure.Configuration
 {
     using System.Net;
     using Akka.Cluster.Hosting;
@@ -54,7 +54,7 @@ namespace OrderSystem.CatalogService.App.Configuration
 
     public class AkkaSettings
     {
-        public string ActorSystemName { get; set; } = "AkkaWeb";
+        public string ActorSystemName { get; set; } = "OrderSystem";
 
         public bool UseClustering { get; set; } = true;
 
@@ -69,7 +69,7 @@ namespace OrderSystem.CatalogService.App.Configuration
         public ClusterOptions ClusterOptions { get; set; } = new ClusterOptions()
         {
             // use our dynamic local host name by default
-            SeedNodes = new[] { $"akka.tcp://AkkaWebApi@{Dns.GetHostName()}:8081" }
+            SeedNodes = new[] { $"akka.tcp://OrderSystem@{Dns.GetHostName()}:8081" }
         };
 
         public ShardOptions ShardOptions { get; set; } = new ShardOptions();

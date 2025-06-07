@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <PackageId>CRP.OrderSystem.Infrastructure</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>Microsoft Corp.</Authors>
+    <Company>Microsoft Corp.</Company>
+    <Product>Order System Infrastructure</Product>
+    <Description>Shared infrastructure configuration for the Order System microservices</Description>
+    <PackageTags>akka;actor;infrastructure;configuration;ordersystem</PackageTags>
+    <PackageProjectUrl>https://github.com/microsoft/ordersystem</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/microsoft/ordersystem</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Akka" />
+    <PackageReference Include="Akka.Cluster.Hosting" />
+    <PackageReference Include="Akka.Cluster.Sharding" />
+    <PackageReference Include="Akka.Discovery.Azure" />
+    <PackageReference Include="Akka.Hosting" />
+    <PackageReference Include="Akka.Management" />
+    <PackageReference Include="Akka.Persistence.Azure" />
+    <PackageReference Include="Akka.Persistence.Azure.Hosting" />
+    <PackageReference Include="Akka.Persistence.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Petabridge.Cmd.Cluster" />
+    <PackageReference Include="Petabridge.Cmd.Cluster.Sharding" />
+    <PackageReference Include="Petabridge.Cmd.Host" />
+    <PackageReference Include="Petabridge.Cmd.Remote" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OrderSystem.Contracts\OrderSystem.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
