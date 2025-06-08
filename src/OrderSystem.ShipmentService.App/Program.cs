@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OrderSystem.ShipmentService.App.Configuration;
+using OrderSystem.Infrastructure.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +27,7 @@ builder.Configuration
 
 // Add services to the container.
 builder.Services.WithAkkaHealthCheck(HealthCheckType.All);
-builder.Services.ConfigureWebApiAkka(builder.Configuration, (akkaConfigurationBuilder, serviceProvider) =>
+builder.Services.ConfigureOrderSystemAkka(builder.Configuration, (akkaConfigurationBuilder, serviceProvider) =>
 {
     // we configure instrumentation separately from the internals of the ActorSystem
     akkaConfigurationBuilder.ConfigurePetabridgeCmd();

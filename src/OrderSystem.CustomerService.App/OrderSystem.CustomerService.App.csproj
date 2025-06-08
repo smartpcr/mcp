@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OrderSystem.Contracts\OrderSystem.Contracts.csproj"/>
+    <ProjectReference Include="..\OrderSystem.Infrastructure\OrderSystem.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

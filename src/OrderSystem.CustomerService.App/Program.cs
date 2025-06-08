@@ -13,7 +13,7 @@ namespace OrderSystem.CustomerService.App
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using OrderSystem.CustomerService.App.Configuration;
+    using OrderSystem.Infrastructure.Configuration;
 
     internal class Program
     {
@@ -33,7 +33,7 @@ namespace OrderSystem.CustomerService.App
 
             // Add services to the container.
             builder.Services.WithAkkaHealthCheck(HealthCheckType.All);
-            builder.Services.ConfigureWebApiAkka(builder.Configuration, (akkaConfigurationBuilder, serviceProvider) =>
+            builder.Services.ConfigureOrderSystemAkka(builder.Configuration, (akkaConfigurationBuilder, serviceProvider) =>
             {
                 // we configure instrumentation separately from the internals of the ActorSystem
                 akkaConfigurationBuilder.ConfigurePetabridgeCmd();

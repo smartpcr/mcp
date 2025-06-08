@@ -18,7 +18,6 @@
     <PbmVersion>1.4.4</PbmVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Automatonymous" Version="5.1.3" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
     <PackageVersion Include="ModelContextProtocol" Version="0.2.0-preview.3" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.2.0" />
@@ -61,6 +60,7 @@
   <ItemGroup>
     <PackageVersion Include="Nerdbank.GitVersioning" Version="3.7.115" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="Stateless" Version="5.17.0" />
     <PackageVersion Include="Unity" Version="5.11.7" />
   </ItemGroup>
   <!-- test -->

@@ -13,13 +13,12 @@ namespace OrderSystem.OrderService.App.Actors
     using Akka.Actor;
     using Akka.Event;
     using Akka.Persistence;
-    using Automatonymous;
     using OrderSystem.Contracts.Models;
     using Shared.Contracts.Messages;
 
     public class OrderActor : ReceivePersistentActor
     {
-        private readonly OrderStateMachine stateMachine;
+        private OrderStateMachine? stateMachine;
         private OrderSagaData sagaData;
         private readonly string orderId;
         private readonly HashSet<string> processedCommands = new();
@@ -29,13 +28,14 @@ namespace OrderSystem.OrderService.App.Actors
         {
             this.log = Context.GetLogger();
             this.orderId = orderId;
-            this.stateMachine = new OrderStateMachine();
             this.sagaData = new OrderSagaData
             {
                 CorrelationId = Guid.NewGuid(),
                 OrderId = orderId,
-                ActorContext = Context
+                ActorContext = Context,
+                CurrentState = OrderState.Initial.ToString()
             };
+            this.stateMachine = new OrderStateMachine(this.sagaData);
 
             this.SetupMessageHandlers();
             this.SetupEventSubscriptions();
@@ -59,6 +59,7 @@ namespace OrderSystem.OrderService.App.Actors
                 {
                     this.sagaData = data;
                     this.sagaData.ActorContext = Context;
+                    this.stateMachine = new OrderStateMachine(this.sagaData);
                 }
             });
         }
@@ -104,17 +105,8 @@ namespace OrderSystem.OrderService.App.Actors
                 this.MarkCommandProcessed(cmd.CorrelationId);
                 this.Sender.Tell(e);
 
-                // Fire the state machine event
-                var orderCreatedData = new OrderCreatedData
-                {
-                    OrderId = e.OrderId,
-                    CustomerId = e.CustomerId,
-                    Items = e.Items,
-                    TotalAmount = e.TotalAmount,
-                    ShippingAddress = e.ShippingAddress
-                };
-
-                await this.stateMachine.RaiseEvent(this.sagaData, this.stateMachine.OrderCreatedEvent, orderCreatedData);
+                // Fire the state machine trigger
+                await this.stateMachine!.FireAsync(OrderTrigger.OrderCreated);
                 Context.System.EventStream.Publish(e);
             });
         }
@@ -130,13 +122,7 @@ namespace OrderSystem.OrderService.App.Actors
                 this.sagaData = this.ApplyEvent(this.sagaData, e);
                 this.MarkCommandProcessed(cmd.CorrelationId);
 
-                var cancellationData = new CancellationData
-                {
-                    OrderId = this.orderId,
-                    Reason = cmd.Reason
-                };
-
-                await this.stateMachine.RaiseEvent(this.sagaData, this.stateMachine.CancelOrderEvent, cancellationData);
+                await this.stateMachine!.FireAsync(OrderTrigger.CancelOrder);
                 Context.System.EventStream.Publish(e);
             });
         }
@@ -153,14 +139,7 @@ namespace OrderSystem.OrderService.App.Actors
 
             if (allReserved)
             {
-                var stockReservationData = new StockReservationData
-                {
-                    OrderId = evt.OrderId,
-                    ProductId = evt.ProductId,
-                    IsSuccess = true
-                };
-
-                await this.stateMachine.RaiseEvent(this.sagaData, this.stateMachine.AllStockReservedEvent, stockReservationData);
+                await this.stateMachine!.FireAsync(OrderTrigger.AllStockReserved);
                 this.UpdateOrderStatus(OrderStatus.Preparing, "All stock reserved");
             }
         }
@@ -169,15 +148,7 @@ namespace OrderSystem.OrderService.App.Actors
         {
             if (evt.OrderId != this.orderId) return;
 
-            var stockReservationData = new StockReservationData
-            {
-                OrderId = evt.OrderId,
-                ProductId = evt.ProductId,
-                IsSuccess = false,
-                Reason = evt.Reason
-            };
-
-            await this.stateMachine.RaiseEvent(this.sagaData, this.stateMachine.StockReservationFailedEvent, stockReservationData);
+            await this.stateMachine!.FireAsync(OrderTrigger.StockReservationFailed);
             this.UpdateOrderStatus(OrderStatus.OutOfStock, $"Stock reservation failed: {evt.Reason}");
         }
 
@@ -185,15 +156,7 @@ namespace OrderSystem.OrderService.App.Actors
         {
             if (evt.PaymentId != this.sagaData.PaymentId) return;
 
-            var paymentData = new PaymentData
-            {
-                OrderId = this.orderId,
-                PaymentId = evt.PaymentId,
-                IsSuccess = true,
-                TransactionId = evt.TransactionId
-            };
-
-            await this.stateMachine.RaiseEvent(this.sagaData, this.stateMachine.PaymentSucceededEvent, paymentData);
+            await this.stateMachine!.FireAsync(OrderTrigger.PaymentSucceeded);
             this.UpdateOrderStatus(OrderStatus.PaymentConfirmed, "Payment completed");
         }
 
@@ -201,15 +164,7 @@ namespace OrderSystem.OrderService.App.Actors
         {
             if (evt.PaymentId != this.sagaData.PaymentId) return;
 
-            var paymentData = new PaymentData
-            {
-                OrderId = this.orderId,
-                PaymentId = evt.PaymentId,
-                IsSuccess = false,
-                Reason = evt.Reason
-            };
-
-            await this.stateMachine.RaiseEvent(this.sagaData, this.stateMachine.PaymentFailedEvent, paymentData);
+            await this.stateMachine!.FireAsync(OrderTrigger.PaymentFailed);
             this.UpdateOrderStatus(OrderStatus.PaymentFailed, $"Payment failed: {evt.Reason}");
         }
 
@@ -217,15 +172,7 @@ namespace OrderSystem.OrderService.App.Actors
         {
             if (evt.ShipmentId != this.sagaData.ShipmentId) return;
 
-            var shipmentData = new ShipmentData
-            {
-                OrderId = this.orderId,
-                ShipmentId = evt.ShipmentId,
-                IsSuccess = true,
-                TrackingNumber = evt.TrackingNumber
-            };
-
-            await this.stateMachine.RaiseEvent(this.sagaData, this.stateMachine.ShipmentScheduledEvent, shipmentData);
+            await this.stateMachine!.FireAsync(OrderTrigger.ShipmentScheduled);
             this.UpdateOrderStatus(OrderStatus.Shipped, "Shipment scheduled");
         }
 
@@ -233,15 +180,7 @@ namespace OrderSystem.OrderService.App.Actors
         {
             if (evt.ShipmentId != this.sagaData.ShipmentId) return;
 
-            var shipmentData = new ShipmentData
-            {
-                OrderId = this.orderId,
-                ShipmentId = evt.ShipmentId,
-                IsSuccess = false,
-                Reason = evt.Reason
-            };
-
-            await this.stateMachine.RaiseEvent(this.sagaData, this.stateMachine.ShipmentFailedEvent, shipmentData);
+            await this.stateMachine!.FireAsync(OrderTrigger.ShipmentFailed);
             this.UpdateOrderStatus(OrderStatus.ShipmentFailed, $"Shipment failed: {evt.Reason}");
         }
 

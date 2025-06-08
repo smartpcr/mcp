@@ -8,128 +8,220 @@ namespace OrderSystem.OrderService.App.Actors
 {
     using System;
     using System.Collections.Generic;
-    using Automatonymous;
+    using System.Threading.Tasks;
+    using Stateless;
     using OrderSystem.Contracts.Models;
 
-    public class OrderStateMachine : AutomatonymousStateMachine<OrderSagaData>
+    public enum OrderState
     {
-        public OrderStateMachine()
+        Initial,
+        AwaitingStockReservation,
+        StockReserved,
+        AwaitingPayment,
+        PaymentCompleted,
+        AwaitingShipment,
+        Shipped,
+        Delivered,
+        Failed,
+        Cancelled
+    }
+
+    public enum OrderTrigger
+    {
+        OrderCreated,
+        AllStockReserved,
+        StockReservationFailed,
+        PaymentRequested,
+        PaymentSucceeded,
+        PaymentFailed,
+        ShipmentRequested,
+        ShipmentScheduled,
+        ShipmentFailed,
+        Delivered,
+        CancelOrder
+    }
+
+    public class OrderStateMachine
+    {
+        private readonly StateMachine<OrderState, OrderTrigger> stateMachine;
+        private readonly OrderSagaData sagaData;
+
+        public OrderStateMachine(OrderSagaData sagaData)
         {
-            InstanceState(x => x.CurrentState);
-
-            Initially(
-                When(OrderCreatedEvent)
-                    .TransitionTo(AwaitingStockReservation)
-                    .Then(context => 
-                    {
-                        context.Instance.OrderId = context.Data.OrderId;
-                        context.Instance.CustomerId = context.Data.CustomerId;
-                        context.Instance.Items = context.Data.Items;
-                        context.Instance.TotalAmount = context.Data.TotalAmount;
-                        context.Instance.ShippingAddress = context.Data.ShippingAddress;
-                        context.Instance.CreatedAt = DateTime.UtcNow;
-                    })
-                    .ThenAsync(async context =>
-                    {
-                        // Trigger stock reservation requests
-                        await context.Instance.RequestStockReservations(context);
-                    })
+            this.sagaData = sagaData;
+            this.stateMachine = new StateMachine<OrderState, OrderTrigger>(
+                () => this.GetCurrentState(),
+                state => this.SetCurrentState(state)
             );
 
-            During(AwaitingStockReservation,
-                When(AllStockReservedEvent)
-                    .TransitionTo(StockReserved)
-                    .ThenAsync(async context =>
-                    {
-                        // Trigger payment processing
-                        await context.Instance.RequestPaymentProcessing(context);
-                    }),
-                When(StockReservationFailedEvent)
-                    .TransitionTo(Failed)
-                    .ThenAsync(async context =>
-                    {
-                        await context.Instance.HandleFailureCompensation(context);
-                    })
-            );
-
-            During(StockReserved,
-                When(PaymentRequestedEvent)
-                    .TransitionTo(AwaitingPayment)
-            );
-
-            During(AwaitingPayment,
-                When(PaymentSucceededEvent)
-                    .TransitionTo(PaymentCompleted)
-                    .ThenAsync(async context =>
-                    {
-                        // Trigger shipment creation
-                        await context.Instance.RequestShipment(context);
-                    }),
-                When(PaymentFailedEvent)
-                    .TransitionTo(Failed)
-                    .ThenAsync(async context =>
-                    {
-                        await context.Instance.HandleFailureCompensation(context);
-                    })
-            );
-
-            During(PaymentCompleted,
-                When(ShipmentRequestedEvent)
-                    .TransitionTo(AwaitingShipment)
-            );
-
-            During(AwaitingShipment,
-                When(ShipmentScheduledEvent)
-                    .TransitionTo(Shipped),
-                When(ShipmentFailedEvent)
-                    .TransitionTo(Failed)
-                    .ThenAsync(async context =>
-                    {
-                        await context.Instance.HandleFailureCompensation(context);
-                    })
-            );
-
-            During(Shipped,
-                When(DeliveredEvent)
-                    .TransitionTo(Delivered)
-            );
-
-            // Cancellation can happen from any state except final states
-            DuringAny(
-                When(CancelOrderEvent)
-                    .TransitionTo(Cancelled)
-                    .ThenAsync(async context =>
-                    {
-                        await context.Instance.HandleCancellationCompensation(context);
-                    })
-            );
-
-            // State machine configured
+            ConfigureStateMachine();
         }
 
-        // States
-        public State AwaitingStockReservation { get; private set; }
-        public State StockReserved { get; private set; }
-        public State AwaitingPayment { get; private set; }
-        public State PaymentCompleted { get; private set; }
-        public State AwaitingShipment { get; private set; }
-        public State Shipped { get; private set; }
-        public State Delivered { get; private set; }
-        public State Failed { get; private set; }
-        public State Cancelled { get; private set; }
+        public StateMachine<OrderState, OrderTrigger> Machine => stateMachine;
 
-        // Events
-        public Event<OrderCreatedData> OrderCreatedEvent { get; private set; }
-        public Event<StockReservationData> AllStockReservedEvent { get; private set; }
-        public Event<StockReservationData> StockReservationFailedEvent { get; private set; }
-        public Event<PaymentData> PaymentRequestedEvent { get; private set; }
-        public Event<PaymentData> PaymentSucceededEvent { get; private set; }
-        public Event<PaymentData> PaymentFailedEvent { get; private set; }
-        public Event<ShipmentData> ShipmentRequestedEvent { get; private set; }
-        public Event<ShipmentData> ShipmentScheduledEvent { get; private set; }
-        public Event<ShipmentData> ShipmentFailedEvent { get; private set; }
-        public Event<DeliveryData> DeliveredEvent { get; private set; }
-        public Event<CancellationData> CancelOrderEvent { get; private set; }
+        public async Task FireAsync(OrderTrigger trigger, object? data = null)
+        {
+            await stateMachine.FireAsync(trigger);
+        }
+
+        public bool CanFire(OrderTrigger trigger)
+        {
+            return stateMachine.CanFire(trigger);
+        }
+
+        public OrderState CurrentState => stateMachine.State;
+
+        private OrderState GetCurrentState()
+        {
+            return Enum.TryParse<OrderState>(sagaData.CurrentState, out var state) 
+                ? state 
+                : OrderState.Initial;
+        }
+
+        private void SetCurrentState(OrderState state)
+        {
+            sagaData.CurrentState = state.ToString();
+        }
+
+        private void ConfigureStateMachine()
+        {
+            // Initial state transitions
+            stateMachine.Configure(OrderState.Initial)
+                .Permit(OrderTrigger.OrderCreated, OrderState.AwaitingStockReservation)
+                .OnEntryFromAsync(OrderTrigger.OrderCreated, async () => await OnOrderCreated());
+
+            // Stock reservation phase
+            stateMachine.Configure(OrderState.AwaitingStockReservation)
+                .Permit(OrderTrigger.AllStockReserved, OrderState.StockReserved)
+                .Permit(OrderTrigger.StockReservationFailed, OrderState.Failed)
+                .Permit(OrderTrigger.CancelOrder, OrderState.Cancelled)
+                .OnEntryFromAsync(OrderTrigger.AllStockReserved, async () => await OnStockReserved())
+                .OnEntryFromAsync(OrderTrigger.StockReservationFailed, async () => await OnStockReservationFailed());
+
+            // Payment phase
+            stateMachine.Configure(OrderState.StockReserved)
+                .Permit(OrderTrigger.PaymentRequested, OrderState.AwaitingPayment)
+                .Permit(OrderTrigger.CancelOrder, OrderState.Cancelled)
+                .OnEntryAsync(async () => await OnPaymentRequested());
+
+            stateMachine.Configure(OrderState.AwaitingPayment)
+                .Permit(OrderTrigger.PaymentSucceeded, OrderState.PaymentCompleted)
+                .Permit(OrderTrigger.PaymentFailed, OrderState.Failed)
+                .Permit(OrderTrigger.CancelOrder, OrderState.Cancelled)
+                .OnEntryFromAsync(OrderTrigger.PaymentSucceeded, async () => await OnPaymentSucceeded())
+                .OnEntryFromAsync(OrderTrigger.PaymentFailed, async () => await OnPaymentFailed());
+
+            // Shipment phase
+            stateMachine.Configure(OrderState.PaymentCompleted)
+                .Permit(OrderTrigger.ShipmentRequested, OrderState.AwaitingShipment)
+                .Permit(OrderTrigger.CancelOrder, OrderState.Cancelled)
+                .OnEntryAsync(async () => await OnShipmentRequested());
+
+            stateMachine.Configure(OrderState.AwaitingShipment)
+                .Permit(OrderTrigger.ShipmentScheduled, OrderState.Shipped)
+                .Permit(OrderTrigger.ShipmentFailed, OrderState.Failed)
+                .Permit(OrderTrigger.CancelOrder, OrderState.Cancelled)
+                .OnEntryFromAsync(OrderTrigger.ShipmentScheduled, async () => await OnShipmentScheduled())
+                .OnEntryFromAsync(OrderTrigger.ShipmentFailed, async () => await OnShipmentFailed());
+
+            // Delivery phase
+            stateMachine.Configure(OrderState.Shipped)
+                .Permit(OrderTrigger.Delivered, OrderState.Delivered)
+                .OnEntryFromAsync(OrderTrigger.Delivered, async () => await OnDelivered());
+
+            // Final states
+            stateMachine.Configure(OrderState.Delivered)
+                .OnEntry(() => OnOrderCompleted());
+
+            stateMachine.Configure(OrderState.Failed)
+                .OnEntryAsync(async () => await OnOrderFailed());
+
+            stateMachine.Configure(OrderState.Cancelled)
+                .OnEntryAsync(async () => await OnOrderCancelled());
+        }
+
+        // State entry actions
+        private async Task OnOrderCreated()
+        {
+            sagaData.CreatedAt = DateTime.UtcNow;
+            sagaData.LastUpdated = DateTime.UtcNow;
+            await sagaData.RequestStockReservations();
+        }
+
+        private async Task OnStockReserved()
+        {
+            sagaData.LastUpdated = DateTime.UtcNow;
+            await sagaData.RequestPaymentProcessing();
+        }
+
+        private async Task OnStockReservationFailed()
+        {
+            sagaData.LastUpdated = DateTime.UtcNow;
+            await sagaData.HandleFailureCompensation();
+        }
+
+        private async Task OnPaymentRequested()
+        {
+            sagaData.LastUpdated = DateTime.UtcNow;
+            await Task.CompletedTask;
+        }
+
+        private async Task OnPaymentSucceeded()
+        {
+            sagaData.LastUpdated = DateTime.UtcNow;
+            await sagaData.RequestShipment();
+        }
+
+        private async Task OnPaymentFailed()
+        {
+            sagaData.LastUpdated = DateTime.UtcNow;
+            await sagaData.HandleFailureCompensation();
+        }
+
+        private async Task OnShipmentRequested()
+        {
+            sagaData.LastUpdated = DateTime.UtcNow;
+            await Task.CompletedTask;
+        }
+
+        private async Task OnShipmentScheduled()
+        {
+            sagaData.LastUpdated = DateTime.UtcNow;
+            await Task.CompletedTask;
+        }
+
+        private async Task OnShipmentFailed()
+        {
+            sagaData.LastUpdated = DateTime.UtcNow;
+            await sagaData.HandleFailureCompensation();
+        }
+
+        private async Task OnDelivered()
+        {
+            sagaData.LastUpdated = DateTime.UtcNow;
+            sagaData.Status = OrderStatus.Delivered;
+            await Task.CompletedTask;
+        }
+
+        private void OnOrderCompleted()
+        {
+            sagaData.LastUpdated = DateTime.UtcNow;
+            sagaData.Status = OrderStatus.Delivered;
+        }
+
+        private async Task OnOrderFailed()
+        {
+            sagaData.LastUpdated = DateTime.UtcNow;
+            sagaData.Status = OrderStatus.PaymentFailed;
+            await Task.CompletedTask;
+        }
+
+        private async Task OnOrderCancelled()
+        {
+            sagaData.LastUpdated = DateTime.UtcNow;
+            sagaData.Status = OrderStatus.Cancelled;
+            await sagaData.HandleCancellationCompensation();
+        }
     }
 
     // Event Data Types

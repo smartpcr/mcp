@@ -11,7 +11,6 @@ namespace OrderSystem.OrderService.App.Actors
     using System.Linq;
     using System.Threading.Tasks;
     using Akka.Actor;
-    using Automatonymous;
     using OrderSystem.Contracts.Models;
 
     public class OrderSagaData
@@ -38,7 +37,7 @@ namespace OrderSystem.OrderService.App.Actors
         // Actor Context for publishing events
         public IActorContext? ActorContext { get; set; }
 
-        public async Task RequestStockReservations(BehaviorContext<OrderSagaData> context)
+        public async Task RequestStockReservations()
         {
             foreach (var item in this.Items)
             {
@@ -48,7 +47,7 @@ namespace OrderSystem.OrderService.App.Actors
             await Task.CompletedTask;
         }
 
-        public async Task RequestPaymentProcessing(BehaviorContext<OrderSagaData> context)
+        public async Task RequestPaymentProcessing()
         {
             this.PaymentId = Guid.NewGuid().ToString();
             this.LastUpdated = DateTime.UtcNow;
@@ -65,7 +64,7 @@ namespace OrderSystem.OrderService.App.Actors
             await Task.CompletedTask;
         }
 
-        public async Task RequestShipment(BehaviorContext<OrderSagaData> context)
+        public async Task RequestShipment()
         {
             this.ShipmentId = Guid.NewGuid().ToString();
             this.LastUpdated = DateTime.UtcNow;
@@ -81,7 +80,7 @@ namespace OrderSystem.OrderService.App.Actors
             await Task.CompletedTask;
         }
 
-        public async Task HandleFailureCompensation(BehaviorContext<OrderSagaData> context)
+        public async Task HandleFailureCompensation()
         {
             // Release stock reservations
             foreach (var productId in this.ReservedProducts)
@@ -102,9 +101,9 @@ namespace OrderSystem.OrderService.App.Actors
             await Task.CompletedTask;
         }
 
-        public async Task HandleCancellationCompensation(BehaviorContext<OrderSagaData> context)
+        public async Task HandleCancellationCompensation()
         {
-            await this.HandleFailureCompensation(context);
+            await this.HandleFailureCompensation();
             this.Status = OrderStatus.Cancelled;
         }
     }
