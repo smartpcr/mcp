@@ -21,25 +21,25 @@ namespace OrderSystem.Infrastructure.Controllers
 
         protected BaseCounterController(ILogger logger, IRequiredActor<TCounterActor> counterActor)
         {
-            Logger = logger;
-            CounterActor = counterActor.ActorRef;
+            this.Logger = logger;
+            this.CounterActor = counterActor.ActorRef;
         }
 
         public async Task<TCounter> GetCounter(string counterId)
         {
-            var counter = await CounterActor.Ask<TCounter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5));
+            var counter = await this.CounterActor.Ask<TCounter>(new FetchCounter(counterId), TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             return counter;
         }
 
         public async Task<CounterCommandResponse> IncrementCounter(string counterId, int increment)
         {
-            var result = await CounterActor.Ask<CounterCommandResponse>(new IncrementCounterCommand(counterId, increment), TimeSpan.FromSeconds(5));
+            var result = await this.CounterActor.Ask<CounterCommandResponse>(new IncrementCounterCommand(counterId, increment), TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             return result;
         }
 
         public async Task<CounterCommandResponse> SetCounter(string counterId, int counterValue)
         {
-            var result = await CounterActor.Ask<CounterCommandResponse>(new SetCounterCommand(counterId, counterValue), TimeSpan.FromSeconds(5));
+            var result = await this.CounterActor.Ask<CounterCommandResponse>(new SetCounterCommand(counterId, counterValue), TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             return result;
         }
     }

@@ -12,7 +12,7 @@ namespace OrderSystem.CustomerService.Tests.Actors
     using Akka.TestKit.Xunit2;
     using FluentAssertions;
     using OrderSystem.Contracts.Messages;
-    using OrderSystem.CustomerService.App.Actors;
+    using OrderSystem.Infrastructure.Actors;
     using Xunit;
 
     public class GenericChildPerEntityParentTests : TestKit

@@ -44,7 +44,7 @@ namespace OrderSystem.OrderService.App.Actors
                 var reserveStockCmd = new ReserveStock(item.ProductId, this.OrderId, item.Quantity, this.OrderId);
                 this.ActorContext?.System.EventStream.Publish(reserveStockCmd);
             }
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         public async Task RequestPaymentProcessing()
@@ -61,7 +61,7 @@ namespace OrderSystem.OrderService.App.Actors
                 this.OrderId);
 
             this.ActorContext?.System.EventStream.Publish(processPaymentCmd);
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         public async Task RequestShipment()
@@ -77,7 +77,7 @@ namespace OrderSystem.OrderService.App.Actors
                 this.OrderId);
 
             this.ActorContext?.System.EventStream.Publish(createShipmentCmd);
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         public async Task HandleFailureCompensation()
@@ -98,12 +98,12 @@ namespace OrderSystem.OrderService.App.Actors
 
             this.Status = OrderStatus.PaymentFailed;
             this.LastUpdated = DateTime.UtcNow;
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         public async Task HandleCancellationCompensation()
         {
-            await this.HandleFailureCompensation();
+            await this.HandleFailureCompensation().ConfigureAwait(false);
             this.Status = OrderStatus.Cancelled;
         }
     }

@@ -105,8 +105,8 @@ namespace OrderSystem.OrderService.App.Actors
                 this.MarkCommandProcessed(cmd.CorrelationId);
                 this.Sender.Tell(e);
 
-                // Fire the state machine trigger
-                await this.stateMachine!.FireAsync(OrderTrigger.OrderCreated);
+                // Fire the state machine trigger to transition to AwaitingStockReservation
+                await this.stateMachine!.FireAsync(OrderTrigger.OrderCreated).ConfigureAwait(false);
                 Context.System.EventStream.Publish(e);
             });
         }
@@ -122,7 +122,7 @@ namespace OrderSystem.OrderService.App.Actors
                 this.sagaData = this.ApplyEvent(this.sagaData, e);
                 this.MarkCommandProcessed(cmd.CorrelationId);
 
-                await this.stateMachine!.FireAsync(OrderTrigger.CancelOrder);
+                await this.stateMachine!.FireAsync(OrderTrigger.CancelOrder).ConfigureAwait(false);
                 Context.System.EventStream.Publish(e);
             });
         }
@@ -139,8 +139,9 @@ namespace OrderSystem.OrderService.App.Actors
 
             if (allReserved)
             {
-                await this.stateMachine!.FireAsync(OrderTrigger.AllStockReserved);
-                this.UpdateOrderStatus(OrderStatus.Preparing, "All stock reserved");
+                await this.stateMachine!.FireAsync(OrderTrigger.AllStockReserved).ConfigureAwait(false);
+                // State machine will handle payment request automatically
+                await this.stateMachine!.FireAsync(OrderTrigger.PaymentRequested).ConfigureAwait(false);
             }
         }
 
@@ -148,7 +149,7 @@ namespace OrderSystem.OrderService.App.Actors
         {
             if (evt.OrderId != this.orderId) return;
 
-            await this.stateMachine!.FireAsync(OrderTrigger.StockReservationFailed);
+            await this.stateMachine!.FireAsync(OrderTrigger.StockReservationFailed).ConfigureAwait(false);
             this.UpdateOrderStatus(OrderStatus.OutOfStock, $"Stock reservation failed: {evt.Reason}");
         }
 
@@ -156,32 +157,30 @@ namespace OrderSystem.OrderService.App.Actors
         {
             if (evt.PaymentId != this.sagaData.PaymentId) return;
 
-            await this.stateMachine!.FireAsync(OrderTrigger.PaymentSucceeded);
-            this.UpdateOrderStatus(OrderStatus.PaymentConfirmed, "Payment completed");
+            await this.stateMachine!.FireAsync(OrderTrigger.PaymentSucceeded).ConfigureAwait(false);
+            // State machine will handle shipment request automatically
+            await this.stateMachine!.FireAsync(OrderTrigger.ShipmentRequested).ConfigureAwait(false);
         }
 
         private async Task Handle(PaymentFailedEvent evt)
         {
             if (evt.PaymentId != this.sagaData.PaymentId) return;
 
-            await this.stateMachine!.FireAsync(OrderTrigger.PaymentFailed);
-            this.UpdateOrderStatus(OrderStatus.PaymentFailed, $"Payment failed: {evt.Reason}");
+            await this.stateMachine!.FireAsync(OrderTrigger.PaymentFailed).ConfigureAwait(false);
         }
 
         private async Task Handle(ShipmentScheduledEvent evt)
         {
             if (evt.ShipmentId != this.sagaData.ShipmentId) return;
 
-            await this.stateMachine!.FireAsync(OrderTrigger.ShipmentScheduled);
-            this.UpdateOrderStatus(OrderStatus.Shipped, "Shipment scheduled");
+            await this.stateMachine!.FireAsync(OrderTrigger.ShipmentScheduled).ConfigureAwait(false);
         }
 
         private async Task Handle(ShipmentFailedEvent evt)
         {
             if (evt.ShipmentId != this.sagaData.ShipmentId) return;
 
-            await this.stateMachine!.FireAsync(OrderTrigger.ShipmentFailed);
-            this.UpdateOrderStatus(OrderStatus.ShipmentFailed, $"Shipment failed: {evt.Reason}");
+            await this.stateMachine!.FireAsync(OrderTrigger.ShipmentFailed).ConfigureAwait(false);
         }
 
         private void UpdateOrderStatus(OrderStatus newStatus, string reason)
